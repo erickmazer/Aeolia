@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 //  - Magic link (e-mail):   ?token_hash=...&type=email → verifyOtp
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
-  const next = searchParams.get('next') ?? '/biblioteca/minha'
+  const next = searchParams.get('next') ?? '/studio'
   const code = searchParams.get('code')
   const tokenHash = searchParams.get('token_hash')
   const type = searchParams.get('type') as EmailOtpType | null
@@ -25,5 +25,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/biblioteca?erro=auth`)
+  return NextResponse.redirect(`${origin}/studio?erro=auth`)
 }

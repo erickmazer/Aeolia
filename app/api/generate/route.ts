@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import { createClient } from '@/lib/supabase/server'
-import { buildFichePrompt, ficheSchema, FICHE_MODEL } from '../../_lib/fiche-ai'
+import { buildFichePrompt, ficheSchema, FICHE_MODEL } from '@/lib/library/fiche-ai'
 
 export const runtime = 'nodejs'
 

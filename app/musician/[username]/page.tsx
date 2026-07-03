@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { Ja } from '@/components/Ja'
-import { Library } from './_components/library'
-import { getShowcaseSongs, getCurrentUser } from './_lib/queries'
+import { Library } from '@/components/library/library'
+import { getShowcaseSongs, getCurrentUser } from '@/lib/library/queries'
 
 export const metadata = {
-  title: 'Biblioteca Musical',
+  title: 'Biblioteca do Violonista',
   description:
-    'Um guia vivo da minha evolução na música — repertório, técnicas e objetivos organizados como um mapa da jornada.',
+    'Um guia vivo da minha evolução no violão — repertório, técnicas e objetivos organizados como um mapa da jornada.',
 }
 
 const objetivos = [
@@ -17,7 +17,16 @@ const objetivos = [
   'Ter um repertório especial para tocar para minha filha.',
 ]
 
-export default async function BibliotecaPage() {
+// Rota dinâmica: /musician/[username]. Por ora renderiza a biblioteca de
+// vitrine (a conta com profiles.is_showcase = true) para qualquer username —
+// erick é o showcase. A resolução por username fica para quando as entidades
+// forem generalizadas (perfis por username, múltiplos instrumentos).
+export default async function MusicianPage({
+  params,
+}: {
+  params: Promise<{ username: string }>
+}) {
+  await params // reservado: futura resolução por username
   const [songs, user] = await Promise.all([getShowcaseSongs(), getCurrentUser()])
 
   return (
@@ -41,10 +50,10 @@ export default async function BibliotecaPage() {
           <p className="mb-8 text-xs uppercase tracking-widest text-[color:var(--color-ash)]">michi — the way</p>
 
           <h1 className="mb-6 font-serif text-3xl leading-tight [text-box:trim-start_cap_alphabetic] md:text-4xl">
-            Biblioteca Musical
+            Biblioteca do Violonista
           </h1>
           <p className="max-w-prose leading-relaxed text-[color:var(--color-paper)]/85">
-            Um guia vivo para acompanhar minha evolução na música ao longo dos anos. Em vez de apenas
+            Um guia vivo para acompanhar minha evolução no violão ao longo dos anos. Em vez de apenas
             listar músicas, ela organiza o aprendizado em torno de <em>repertório</em>, <em>técnicas</em> e{' '}
             <em>objetivos pessoais</em>. Com o tempo, deixa de ser uma lista e vira um mapa da jornada —
             mostrando não só o que aprendi, mas como meu gosto e minha forma de tocar evoluíram.
@@ -65,7 +74,7 @@ export default async function BibliotecaPage() {
 
           <p className="mt-8 text-sm text-[color:var(--color-ash)]">
             <Link
-              href="/biblioteca/minha"
+              href="/studio"
               className="text-[color:var(--color-patina)] underline decoration-[color:var(--color-ash)] decoration-1 underline-offset-4 transition-colors hover:text-[color:var(--color-paper)]"
             >
               {user ? '→ minha biblioteca' : '→ montar a minha biblioteca'}

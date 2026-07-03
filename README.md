@@ -1,15 +1,27 @@
-# Aeolia — Biblioteca Musical
+# Aeolia
 
-Um guia vivo de estudos de música, **multiusuário**: cada pessoa faz login (por
-e-mail/magic link, ou Google) e tem sua própria biblioteca; a página pública
-`/biblioteca` mostra a biblioteca de **vitrine** só para leitura.
+Plataforma para músicos organizarem repertório, técnicas e a evolução dos seus
+estudos — **multiusuário**, começando com **violão** e arquitetada para expandir
+para outros instrumentos.
+
+Cada pessoa faz login (por e-mail/magic link, ou Google) e tem sua própria
+biblioteca. A página pública de cada músico vive em `/musician/[username]`; o
+trabalho pessoal (adicionar/editar/remover, com fichas por IA) fica em `/studio`.
 
 - **Stack:** Next.js 16 + Tailwind CSS v4 + Supabase (Postgres + Auth + RLS) + Claude (Sonnet 5) para gerar fichas.
-- **Rotas:** `/biblioteca` (vitrine pública) · `/biblioteca/minha` (biblioteca pessoal, autenticada).
-- **Enquanto não configurado:** `/biblioteca` mostra a semente curada (13 músicas) como fallback — nada quebra.
+- **Rotas:**
+  - `/musician/[username]` — página pública do músico (vitrine, só leitura). Hoje `/musician/erick`.
+  - `/studio` — biblioteca pessoal autenticada (adicionar/editar/remover).
+  - `/api/generate` — geração de ficha por IA (protegida por login).
+- **Enquanto o Supabase não está configurado:** a vitrine mostra a semente curada (13 músicas) como fallback — nada quebra.
 
-Este projeto foi migrado a partir de `erickmazer/personal-website` (`v1/app/biblioteca`),
-extraído como um app standalone.
+> **Estado atual:** começa com violão (taxonomia de técnicas/contextos e semente
+> são de repertório de violão). A rota `/musician/[username]` já é dinâmica —
+> pronta para uma página pública por usuário — mas a resolução por username e a
+> generalização das entidades (perfis, instrumentos) ficam para um próximo passo.
+
+Migrado a partir de `erickmazer/personal-website` (`v1/app/violao`) e reestruturado
+como um app standalone.
 
 ## Desenvolvimento
 
@@ -18,7 +30,7 @@ bun install
 bun run dev
 ```
 
-Depois abra [http://localhost:7777](http://localhost:7777) (redireciona para `/biblioteca`).
+Depois abra [http://localhost:7777](http://localhost:7777) (redireciona para `/musician/erick`).
 
 ## Setup completo (login + banco + IA)
 

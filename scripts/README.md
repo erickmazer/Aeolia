@@ -1,12 +1,12 @@
 # Scripts
 
-Suporte à [Biblioteca Musical](../app/biblioteca). Setup completo (Supabase +
+Suporte à a biblioteca (`../lib/library`). Setup completo (Supabase +
 login + banco) em [`../README-biblioteca.md`](../README-biblioteca.md).
 
 ## `generate-fiche.ts` — Gerador de ficha por IA (linha de comando)
 
 Passa **título + artista**; o Claude devolve a ficha no mesmo schema da
-biblioteca (compartilha prompt/schema com a rota do site via `_lib/fiche-ai.ts`).
+biblioteca (compartilha prompt/schema com a rota do site via `lib/library/fiche-ai.ts`).
 Reaproveita os IDs válidos de técnicas/contextos, então é impossível gerar uma
 ficha malformada.
 
@@ -20,6 +20,6 @@ Usa **Sonnet 5** por padrão (~0,7 centavo por ficha).
 
 ## `seed-showcase.ts` — Semeia a vitrine
 
-Insere as 13 músicas curadas (`../app/biblioteca/_lib/seed-songs.ts`) na sua conta e
+Insere as 13 músicas curadas (`../lib/library/seed-songs.ts`) na sua conta e
 marca seu profile como vitrine pública. Usa a service-role key (só local). Veja
 o passo a passo em [`../README-biblioteca.md`](../README-biblioteca.md) §4.

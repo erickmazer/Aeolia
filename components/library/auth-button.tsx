@@ -10,7 +10,7 @@ const inputClass =
 const borderStyle = { borderColor: 'color-mix(in oklch, var(--color-ash) 25%, transparent)' } as const
 
 /** Login por e-mail (magic link) — nativo do Supabase, sem configurar provider. */
-export function EmailSignIn({ next = '/biblioteca/minha' }: { next?: string }) {
+export function EmailSignIn({ next = '/studio' }: { next?: string }) {
   const [email, setEmail] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [msg, setMsg] = useState('')
@@ -67,7 +67,7 @@ export function EmailSignIn({ next = '/biblioteca/minha' }: { next?: string }) {
 }
 
 /** Login com Google (só funciona depois de configurar o provider no Supabase). */
-export function SignInButton({ next = '/biblioteca/minha', label = 'Entrar com Google' }: { next?: string; label?: string }) {
+export function SignInButton({ next = '/studio', label = 'Entrar com Google' }: { next?: string; label?: string }) {
   async function signIn() {
     const supabase = createClient()
     await supabase.auth.signInWithOAuth({
@@ -83,7 +83,7 @@ export function SignInButton({ next = '/biblioteca/minha', label = 'Entrar com G
 }
 
 /** Painel completo: e-mail (padrão) + Google (opcional). */
-export function SignInPanel({ next = '/biblioteca/minha' }: { next?: string }) {
+export function SignInPanel({ next = '/studio' }: { next?: string }) {
   return (
     <div className="space-y-3">
       <EmailSignIn next={next} />
@@ -98,7 +98,7 @@ export function SignOutButton() {
   async function signOut() {
     const supabase = createClient()
     await supabase.auth.signOut()
-    window.location.href = '/biblioteca'
+    window.location.href = '/musician/erick'
   }
   return (
     <button type="button" onClick={signOut} className={linkClass}>

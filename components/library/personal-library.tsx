@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Library } from './library'
 import { AddSong } from './add-song'
-import type { Song } from '../_lib/data'
+import type { Song } from '@/lib/library/data'
 
 export function PersonalLibrary({ userId, initialSongs }: { userId: string; initialSongs: Song[] }) {
   const [songs, setSongs] = useState<Song[]>(initialSongs)

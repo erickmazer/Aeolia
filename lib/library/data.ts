@@ -1,4 +1,4 @@
-// Biblioteca Musical — catálogo e tipos (fonte da taxonomia).
+// Biblioteca do Violonista — catálogo e tipos (fonte da taxonomia).
 //
 // As MÚSICAS agora moram no banco (uma biblioteca por usuário). Este arquivo
 // guarda só o catálogo fixo compartilhado por todos: técnicas, contextos,
@@ -57,7 +57,7 @@ export const TECHNIQUES: Technique[] = [
   { id: 'independencia-mao-direita', name: 'Independência da mão direita', blurb: 'Cada dedo com sua própria voz e ritmo.' },
   { id: 'bossa-nova', name: 'Bossa Nova', blurb: 'A batida sincopada e o balanço da mão direita.' },
   { id: 'harmonicos', name: 'Harmônicos', blurb: 'Naturais e artificiais — o brilho de sino.' },
-  { id: 'percussao', name: 'Percussão', blurb: 'Usar o corpo do instrumento como um tambor.' },
+  { id: 'percussao', name: 'Percussão no violão', blurb: 'Usar o corpo do instrumento como um tambor.' },
   { id: 'voicings', name: 'Voicings e acordes sofisticados', blurb: 'Tensões, inversões e cores fora do básico.' },
   { id: 'improvisacao', name: 'Improvisação', blurb: 'Frasear livre sobre a harmonia.' },
   { id: 'cantar-tocando', name: 'Cantar enquanto toca', blurb: 'Manter a voz firme com a mão em outro ritmo.' },
@@ -83,8 +83,8 @@ export interface Context {
 
 export const CONTEXTS: Context[] = [
   { id: 'para-filha', name: 'Para tocar para minha filha', blurb: 'O repertório mais importante de todos.' },
-  { id: 'mpb', name: 'MPB', blurb: 'A raiz. Onde a canção e o instrumento se encontram.' },
-  { id: 'folk-indie', name: 'Folk / Indie', blurb: 'Dedilhado intimista, letras de perto.' },
+  { id: 'mpb', name: 'MPB', blurb: 'A raiz. Onde o violão e a canção se encontram.' },
+  { id: 'folk-indie', name: 'Folk / Indie', blurb: 'Violão de dedo, letras de perto.' },
   { id: 'pop-rock', name: 'Pop / Rock internacional', blurb: 'Clássicos que todo mundo reconhece.' },
   { id: 'cantar-junto', name: 'Para cantar junto', blurb: 'Roda, fogueira, sala de casa.' },
   { id: 'relaxar', name: 'Para relaxar', blurb: 'Tocar sem plateia, só pelo som.' },

@@ -52,7 +52,7 @@ const difficultyGuide = Object.entries(DIFFICULTY_LABELS)
   .join(', ')
 
 export function buildFichePrompt(title: string, artist: string): string {
-  return `Você cataloga músicas para uma biblioteca pessoal de estudos de música.
+  return `Você cataloga músicas para uma biblioteca pessoal de estudos de violão.
 Preencha a ficha da música "${title}" — ${artist}.
 
 Técnicas disponíveis (use os ids):
@@ -61,8 +61,8 @@ ${techniqueGuide}
 Contextos disponíveis (use os ids):
 ${contextGuide}
 
-Dificuldade: ${difficultyGuide} (do ponto de vista de um músico intermediário
-tocando e cantando junto).
+Dificuldade: ${difficultyGuide} (do ponto de vista de um violonista intermediário
+tocando dedilhado/fingerstyle e cantando junto).
 
 Regras:
 - Escolha só as técnicas e contextos REALMENTE centrais para esta música.

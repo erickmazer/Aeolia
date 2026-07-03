@@ -1,12 +1,12 @@
--- Biblioteca Musical — schema inicial (multiusuário)
+-- Biblioteca (Aeolia) — schema inicial (multiusuário)
 -- ========================================================
 -- Rode isto no seu projeto Supabase (SQL Editor) OU via `supabase db push`.
 -- Técnicas, contextos e status NÃO são tabelas — são um catálogo fixo em código
--- (app/biblioteca/_lib/data.ts). O banco guarda só as músicas de cada usuário.
+-- (lib/library/data.ts). O banco guarda só as músicas de cada usuário.
 
 -- ── profiles ────────────────────────────────────────────────────────────────
 -- Uma linha por usuário autenticado. `is_showcase` marca a biblioteca que
--- aparece na página pública /biblioteca (a sua).
+-- aparece na página pública /musician/[username] (a sua).
 create table if not exists public.profiles (
   id            uuid primary key references auth.users on delete cascade,
   username      text unique,

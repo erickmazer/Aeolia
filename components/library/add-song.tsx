@@ -12,8 +12,8 @@ import {
   type Difficulty,
   type TechniqueId,
   type ContextId,
-} from '../_lib/data'
-import type { FicheDraft } from '../_lib/fiche-ai'
+} from '@/lib/library/data'
+import type { FicheDraft } from '@/lib/library/fiche-ai'
 
 interface Draft extends FicheDraft {
   status: Status
@@ -51,7 +51,7 @@ export function AddSong({ userId, onAdded }: { userId: string; onAdded: (song: S
     setPhase('generating')
     setError(null)
     try {
-      const res = await fetch('/biblioteca/api/generate', {
+      const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ title, artist }),

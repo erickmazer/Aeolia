@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-// Projeto único neste repo: a Biblioteca Musical vive em /biblioteca.
+// Projeto único neste repo: a página pública do músico vive em /musician/[username].
 export default function Home() {
-  redirect("/biblioteca");
+  redirect("/musician/erick");
 }

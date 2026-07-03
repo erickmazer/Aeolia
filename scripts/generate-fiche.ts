@@ -11,7 +11,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk'
-import { buildFichePrompt, ficheSchema, FICHE_MODEL, type FicheDraft } from '../app/biblioteca/_lib/fiche-ai'
+import { buildFichePrompt, ficheSchema, FICHE_MODEL, type FicheDraft } from '../lib/library/fiche-ai'
 
 async function main() {
   const [title, artist] = process.argv.slice(2)

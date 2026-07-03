@@ -16,7 +16,7 @@ import {
   type Status,
   type TechniqueId,
   type ContextId,
-} from '../_lib/data'
+} from '@/lib/library/data'
 
 type ById = Record<string, Song>
 

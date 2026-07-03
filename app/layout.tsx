@@ -6,11 +6,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Biblioteca Musical",
-    template: "%s — Biblioteca Musical",
+    default: "Aeolia",
+    template: "%s — Aeolia",
   },
   description:
-    "Um guia vivo da evolução na música — repertório, técnicas e objetivos organizados como um mapa da jornada.",
+    "Aeolia — plataforma para músicos organizarem repertório, técnicas e a evolução dos seus estudos.",
   robots: { index: true, follow: true },
 };
 

@@ -6,7 +6,7 @@ import { SignInPanel, SignOutButton } from '../_components/auth-button'
 
 export const metadata = {
   title: 'Minha Biblioteca',
-  description: 'Sua biblioteca pessoal de estudos de violão.',
+  description: 'Sua biblioteca pessoal de estudos de música.',
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -14,7 +14,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="relative z-0 min-h-screen bg-[color:var(--color-ink)] px-8 py-16 sm:px-12 md:px-16">
       <div className="mx-auto max-w-3xl">
         <Link
-          href="/violao"
+          href="/biblioteca"
           className="text-sm text-[color:var(--color-patina)] underline decoration-[color:var(--color-ash)] decoration-1 underline-offset-4 transition-colors hover:text-[color:var(--color-paper)]"
         >
           ← vitrine
@@ -31,7 +31,7 @@ export default async function MinhaBibliotecaPage() {
       <Shell>
         <p className="mt-16 max-w-prose leading-relaxed text-[color:var(--color-paper)]/85">
           A biblioteca pessoal ainda não está configurada (falta o Supabase). Veja{' '}
-          <code className="text-[color:var(--color-patina)]">README-violao.md</code> para o setup.
+          <code className="text-[color:var(--color-patina)]">README-biblioteca.md</code> para o setup.
         </p>
       </Shell>
     )
@@ -45,7 +45,7 @@ export default async function MinhaBibliotecaPage() {
         <header className="mb-12 mt-16">
           <h1 className="mb-4 font-serif text-3xl leading-tight [text-box:trim-start_cap_alphabetic]">Minha Biblioteca</h1>
           <p className="mb-6 max-w-prose leading-relaxed text-[color:var(--color-paper)]/85">
-            Entre para montar e acompanhar a sua própria biblioteca do violonista — com fichas
+            Entre para montar e acompanhar a sua própria biblioteca musical — com fichas
             geradas por IA, técnicas, contextos e a sua árvore de evolução.
           </p>
           <SignInPanel />

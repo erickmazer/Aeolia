@@ -1,19 +1,19 @@
-# Biblioteca do Violonista — setup (login + banco)
+# Biblioteca Musical — setup (login + banco)
 
-Guia vivo de estudos de violão, **multiusuário**: cada pessoa faz login (por
+Guia vivo de estudos de música, **multiusuário**: cada pessoa faz login (por
 e-mail/magic link, ou Google) e tem sua própria biblioteca; a página pública
-`/violao` mostra a biblioteca de **vitrine** (a sua) só para leitura.
+`/biblioteca` mostra a biblioteca de **vitrine** (a sua) só para leitura.
 
 - **Stack:** Next.js 16 + Supabase (Postgres + Auth + RLS) + Claude (Sonnet 5) para gerar fichas.
-- **Rotas:** `/violao` (vitrine pública) · `/violao/minha` (sua biblioteca, autenticada).
-- **Enquanto não configurado:** `/violao` mostra a semente curada (13 músicas) como fallback — nada quebra.
+- **Rotas:** `/biblioteca` (vitrine pública) · `/biblioteca/minha` (sua biblioteca, autenticada).
+- **Enquanto não configurado:** `/biblioteca` mostra a semente curada (13 músicas) como fallback — nada quebra.
 
 ## Fluxo de dados
 
 ```
-/violao        → mostra músicas de quem tem profiles.is_showcase = true (RLS permite leitura anônima)
-/violao/minha  → login Google → sua biblioteca (RLS: você só vê/edita as suas)
-adicionar      → POST /violao/api/generate (Claude preenche a ficha) → você revisa → insert no Supabase
+/biblioteca        → mostra músicas de quem tem profiles.is_showcase = true (RLS permite leitura anônima)
+/biblioteca/minha  → login Google → sua biblioteca (RLS: você só vê/edita as suas)
+adicionar      → POST /biblioteca/api/generate (Claude preenche a ficha) → você revisa → insert no Supabase
 ```
 
 ## Setup (uma vez)
@@ -41,10 +41,10 @@ já está na tela; passa a funcionar quando o provider estiver ligado.
 ### 3. Variáveis de ambiente
 Copie `.env.example` → `.env.local` (dev) e preencha; configure as mesmas na **Vercel**:
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `ANTHROPIC_API_KEY` (e opcionalmente `VIOLAO_FICHE_MODEL`)
+- `ANTHROPIC_API_KEY` (e opcionalmente `FICHE_MODEL`)
 
 ### 4. Marcar sua conta como vitrine + semear
-1. Rode o app, acesse `/violao/minha`, faça login com Google uma vez (cria seu profile).
+1. Rode o app, acesse `/biblioteca/minha`, faça login com Google uma vez (cria seu profile).
 2. Pegue seu `user id` em Supabase → Authentication → Users.
 3. Semeie a vitrine com as 13 músicas curadas (usa a service-role key, **só local**):
    ```bash
@@ -59,7 +59,7 @@ Copie `.env.example` → `.env.local` (dev) e preencha; configure as mesmas na *
 
 - A página é pública, mas **RLS** garante que cada usuário só lê/escreve as suas músicas;
   a leitura pública é limitada às músicas da conta de vitrine.
-- A `ANTHROPIC_API_KEY` fica só no servidor; a rota `/violao/api/generate` exige login.
+- A `ANTHROPIC_API_KEY` fica só no servidor; a rota `/biblioteca/api/generate` exige login.
 - **Nunca** exponha a `SUPABASE_SERVICE_ROLE_KEY` no cliente nem na Vercel — ela ignora RLS.
 
 ## Gerador de ficha por linha de comando

@@ -4,9 +4,9 @@ import { Library } from './_components/library'
 import { getShowcaseSongs, getCurrentUser } from './_lib/queries'
 
 export const metadata = {
-  title: 'Biblioteca do Violonista',
+  title: 'Biblioteca Musical',
   description:
-    'Um guia vivo da minha evolução no violão — repertório, técnicas e objetivos organizados como um mapa da jornada.',
+    'Um guia vivo da minha evolução na música — repertório, técnicas e objetivos organizados como um mapa da jornada.',
 }
 
 const objetivos = [
@@ -17,7 +17,7 @@ const objetivos = [
   'Ter um repertório especial para tocar para minha filha.',
 ]
 
-export default async function ViolaoPage() {
+export default async function BibliotecaPage() {
   const [songs, user] = await Promise.all([getShowcaseSongs(), getCurrentUser()])
 
   return (
@@ -41,10 +41,10 @@ export default async function ViolaoPage() {
           <p className="mb-8 text-xs uppercase tracking-widest text-[color:var(--color-ash)]">michi — the way</p>
 
           <h1 className="mb-6 font-serif text-3xl leading-tight [text-box:trim-start_cap_alphabetic] md:text-4xl">
-            Biblioteca do Violonista
+            Biblioteca Musical
           </h1>
           <p className="max-w-prose leading-relaxed text-[color:var(--color-paper)]/85">
-            Um guia vivo para acompanhar minha evolução no violão ao longo dos anos. Em vez de apenas
+            Um guia vivo para acompanhar minha evolução na música ao longo dos anos. Em vez de apenas
             listar músicas, ela organiza o aprendizado em torno de <em>repertório</em>, <em>técnicas</em> e{' '}
             <em>objetivos pessoais</em>. Com o tempo, deixa de ser uma lista e vira um mapa da jornada —
             mostrando não só o que aprendi, mas como meu gosto e minha forma de tocar evoluíram.
@@ -65,7 +65,7 @@ export default async function ViolaoPage() {
 
           <p className="mt-8 text-sm text-[color:var(--color-ash)]">
             <Link
-              href="/violao/minha"
+              href="/biblioteca/minha"
               className="text-[color:var(--color-patina)] underline decoration-[color:var(--color-ash)] decoration-1 underline-offset-4 transition-colors hover:text-[color:var(--color-paper)]"
             >
               {user ? '→ minha biblioteca' : '→ montar a minha biblioteca'}

@@ -7,11 +7,11 @@
  * Rodar:
  *   export ANTHROPIC_API_KEY=sk-ant-...
  *   bun run scripts/generate-fiche.ts "Blackbird" "The Beatles"
- *   VIOLAO_FICHE_MODEL=claude-haiku-4-5 bun run scripts/generate-fiche.ts "..." "..."
+ *   FICHE_MODEL=claude-haiku-4-5 bun run scripts/generate-fiche.ts "..." "..."
  */
 
 import Anthropic from '@anthropic-ai/sdk'
-import { buildFichePrompt, ficheSchema, FICHE_MODEL, type FicheDraft } from '../app/violao/_lib/fiche-ai'
+import { buildFichePrompt, ficheSchema, FICHE_MODEL, type FicheDraft } from '../app/biblioteca/_lib/fiche-ai'
 
 async function main() {
   const [title, artist] = process.argv.slice(2)

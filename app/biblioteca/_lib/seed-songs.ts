@@ -1,4 +1,4 @@
-// Semente curada da Biblioteca do Violonista.
+// Semente curada da Biblioteca Musical.
 //
 // Usada em dois lugares:
 //  1. Fallback da página pública enquanto o Supabase não está configurado.
@@ -21,7 +21,7 @@ export const SEED_SONGS: Song[] = [
     prerequisites: [],
     nextSongs: ['voce-e-linda', 'blackbird'],
     bestVersion: { label: 'Ana Vilela — ao vivo', url: 'https://www.youtube.com/results?search_query=ana+vilela+trem+bala+ao+vivo' },
-    bestLesson: { label: 'Aula (violão e voz)', url: 'https://www.youtube.com/results?search_query=trem+bala+aula+violao' },
+    bestLesson: { label: 'Aula (com voz)', url: 'https://www.youtube.com/results?search_query=trem+bala+aula+violao' },
     notes: 'Quatro acordes e uma letra que a plateia certa já sabe de cor. Boa primeira música para soltar a voz enquanto a mão vai no automático.',
   },
   {
@@ -35,7 +35,7 @@ export const SEED_SONGS: Song[] = [
     prerequisites: [],
     nextSongs: ['voce-e-linda'],
     bestVersion: { label: 'Luiz Gonzaga', url: 'https://www.youtube.com/results?search_query=luiz+gonzaga+asa+branca' },
-    bestLesson: { label: 'Aula de violão', url: 'https://www.youtube.com/results?search_query=asa+branca+aula+violao' },
+    bestLesson: { label: 'Aula', url: 'https://www.youtube.com/results?search_query=asa+branca+aula+violao' },
     notes: 'Patrimônio. Fácil de tocar, difícil de tocar com o balanço certo do baião — é aí que mora a lição.',
   },
   {
@@ -189,7 +189,7 @@ export const SEED_SONGS: Song[] = [
     prerequisites: ['tears-in-heaven'],
     nextSongs: [],
     bestVersion: { label: 'John Williams', url: 'https://www.youtube.com/results?search_query=john+williams+cavatina' },
-    bestLesson: { label: 'Aula de violão clássico', url: 'https://www.youtube.com/results?search_query=cavatina+guitar+lesson' },
+    bestLesson: { label: 'Aula (clássico)', url: 'https://www.youtube.com/results?search_query=cavatina+guitar+lesson' },
     notes: 'Beleza pura, exigência técnica alta. Tema de "O Franco Atirador". Uma música para uma vida inteira de refino.',
   },
 ]

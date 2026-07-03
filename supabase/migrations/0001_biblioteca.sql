@@ -1,12 +1,12 @@
--- Biblioteca do Violonista — schema inicial (multiusuário)
+-- Biblioteca Musical — schema inicial (multiusuário)
 -- ========================================================
 -- Rode isto no seu projeto Supabase (SQL Editor) OU via `supabase db push`.
 -- Técnicas, contextos e status NÃO são tabelas — são um catálogo fixo em código
--- (app/violao/_lib/data.ts). O banco guarda só as músicas de cada usuário.
+-- (app/biblioteca/_lib/data.ts). O banco guarda só as músicas de cada usuário.
 
 -- ── profiles ────────────────────────────────────────────────────────────────
 -- Uma linha por usuário autenticado. `is_showcase` marca a biblioteca que
--- aparece na página pública /violao (a sua).
+-- aparece na página pública /biblioteca (a sua).
 create table if not exists public.profiles (
   id            uuid primary key references auth.users on delete cascade,
   username      text unique,

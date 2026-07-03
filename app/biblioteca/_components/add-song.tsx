@@ -51,7 +51,7 @@ export function AddSong({ userId, onAdded }: { userId: string; onAdded: (song: S
     setPhase('generating')
     setError(null)
     try {
-      const res = await fetch('/violao/api/generate', {
+      const res = await fetch('/biblioteca/api/generate', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ title, artist }),

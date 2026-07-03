@@ -1,14 +1,14 @@
-# Aeolia — Biblioteca do Violonista
+# Aeolia — Biblioteca Musical
 
-Um guia vivo de estudos de violão, **multiusuário**: cada pessoa faz login (por
+Um guia vivo de estudos de música, **multiusuário**: cada pessoa faz login (por
 e-mail/magic link, ou Google) e tem sua própria biblioteca; a página pública
-`/violao` mostra a biblioteca de **vitrine** só para leitura.
+`/biblioteca` mostra a biblioteca de **vitrine** só para leitura.
 
 - **Stack:** Next.js 16 + Tailwind CSS v4 + Supabase (Postgres + Auth + RLS) + Claude (Sonnet 5) para gerar fichas.
-- **Rotas:** `/violao` (vitrine pública) · `/violao/minha` (biblioteca pessoal, autenticada).
-- **Enquanto não configurado:** `/violao` mostra a semente curada (13 músicas) como fallback — nada quebra.
+- **Rotas:** `/biblioteca` (vitrine pública) · `/biblioteca/minha` (biblioteca pessoal, autenticada).
+- **Enquanto não configurado:** `/biblioteca` mostra a semente curada (13 músicas) como fallback — nada quebra.
 
-Este projeto foi migrado a partir de `erickmazer/personal-website` (`v1/app/violao`),
+Este projeto foi migrado a partir de `erickmazer/personal-website` (`v1/app/biblioteca`),
 extraído como um app standalone.
 
 ## Desenvolvimento
@@ -18,12 +18,12 @@ bun install
 bun run dev
 ```
 
-Depois abra [http://localhost:7777](http://localhost:7777) (redireciona para `/violao`).
+Depois abra [http://localhost:7777](http://localhost:7777) (redireciona para `/biblioteca`).
 
 ## Setup completo (login + banco + IA)
 
 O passo a passo de Supabase, login e variáveis de ambiente está em
-[`README-violao.md`](./README-violao.md). Resumo:
+[`README-biblioteca.md`](./README-biblioteca.md). Resumo:
 
 1. Criar projeto Supabase e rodar `supabase/migrations/0001_biblioteca.sql`.
 2. Configurar login por e-mail (zero-config) e, opcionalmente, Google OAuth.

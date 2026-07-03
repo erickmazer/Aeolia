@@ -12,5 +12,5 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/violao', '/violao/:path*', '/auth/:path*'],
+  matcher: ['/biblioteca', '/biblioteca/:path*', '/auth/:path*'],
 }

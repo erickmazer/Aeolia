@@ -13,7 +13,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { SEED_SONGS } from '../app/violao/_lib/seed-songs'
+import { SEED_SONGS } from '../app/biblioteca/_lib/seed-songs'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY

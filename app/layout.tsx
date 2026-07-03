@@ -6,11 +6,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Biblioteca do Violonista",
-    template: "%s — Biblioteca do Violonista",
+    default: "Biblioteca Musical",
+    template: "%s — Biblioteca Musical",
   },
   description:
-    "Um guia vivo da evolução no violão — repertório, técnicas e objetivos organizados como um mapa da jornada.",
+    "Um guia vivo da evolução na música — repertório, técnicas e objetivos organizados como um mapa da jornada.",
   robots: { index: true, follow: true },
 };
 

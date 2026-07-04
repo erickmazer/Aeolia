@@ -9,19 +9,33 @@ biblioteca de **vitrine** só para leitura.
 - **Rotas:** `/musician/[username]` (página pública do músico) · `/studio` (sua biblioteca, autenticada).
 - **Enquanto não configurado:** `/musician/erick` mostra a semente curada (13 músicas) como fallback — nada quebra.
 
+## Modelo de dados
+
+Duas tabelas (migração `0002`):
+- **`canonical_songs`** — dados objetivos da música, **compartilhados** e deduplicados
+  (por `dedup_key` = título+artista sem acento). Melhora com o tempo (`contributor_count`, `verified`).
+- **`library_entries`** — a relação de cada usuário com a música: `status`, nota pessoal e a
+  **árvore pessoal** (`prerequisite_song_ids`/`next_song_ids`). A antiga `songs` fica como legado.
+
 ## Fluxo de dados
 
 ```
-/musician/erick        → mostra músicas de quem tem profiles.is_showcase = true (RLS permite leitura anônima)
-/studio  → login Google → sua biblioteca (RLS: você só vê/edita as suas)
-adicionar      → POST /api/generate (Claude preenche a ficha) → você revisa → insert no Supabase
+/musician/[username] → músicas de quem tem profiles.is_showcase = true (join library_entries → canonical_songs)
+/studio              → login → sua biblioteca (RLS: você só vê/edita as suas entradas)
+adicionar            → POST /api/generate: música JÁ no catálogo → devolve a ficha (sem IA);
+                       música nova → Claude gera o rascunho → você revisa
+salvar               → RPC no cliente (create_canonical_and_add / add_existing_to_library):
+                       cria/reaproveita a canônica e adiciona a sua library_entry
 ```
+
+As escritas na tabela canônica passam por **funções SECURITY DEFINER** (o usuário logado chama a
+RPC, que valida `auth.uid()`). A `SUPABASE_SERVICE_ROLE_KEY` é usada **só** no seed local — nunca na Vercel.
 
 ## Setup (uma vez)
 
 ### 1. Criar o projeto Supabase
 1. [supabase.com](https://supabase.com) → New project.
-2. **SQL Editor** → cole e rode `supabase/migrations/0001_biblioteca.sql` (cria tabelas, RLS e triggers).
+2. **SQL Editor** → rode `supabase/migrations/0001_biblioteca.sql` e depois `0002_canonical.sql` (tabelas, RLS, triggers, RPCs e backfill).
 3. **Project Settings → API** → copie a `URL` e a `anon public key`.
 
 ### 2. Login (e-mail por padrão — zero config)

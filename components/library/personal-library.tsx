@@ -6,19 +6,21 @@ import { Library } from './library'
 import { AddSong } from './add-song'
 import type { Song } from '@/lib/library/data'
 
-export function PersonalLibrary({ userId, initialSongs }: { userId: string; initialSongs: Song[] }) {
+export function PersonalLibrary({ initialSongs }: { initialSongs: Song[] }) {
   const [songs, setSongs] = useState<Song[]>(initialSongs)
 
   async function handleDelete(song: Song) {
+    if (!song.entryId) return
     if (!window.confirm(`Remover "${song.title}" da sua biblioteca?`)) return
     const supabase = createClient()
-    const { error } = await supabase.from('songs').delete().eq('id', song.id)
-    if (!error) setSongs((cur) => cur.filter((s) => s.id !== song.id))
+    // Remove só a entrada do usuário; a música canônica permanece no catálogo.
+    const { error } = await supabase.from('library_entries').delete().eq('id', song.entryId)
+    if (!error) setSongs((cur) => cur.filter((s) => s.entryId !== song.entryId))
   }
 
   return (
     <div className="space-y-12">
-      <AddSong userId={userId} onAdded={(song) => setSongs((cur) => [song, ...cur])} />
+      <AddSong onAdded={(song) => setSongs((cur) => [song, ...cur])} />
       <Library songs={songs} editable onDelete={handleDelete} />
     </div>
   )

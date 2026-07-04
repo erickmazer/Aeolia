@@ -72,7 +72,7 @@ export default async function StudioPage() {
         </p>
       </header>
 
-      <PersonalLibrary userId={user.id} initialSongs={songs} />
+      <PersonalLibrary initialSongs={songs} />
     </Shell>
   )
 }

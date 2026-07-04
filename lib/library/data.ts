@@ -114,6 +114,10 @@ export interface Song {
   bestVersion?: Link
   bestLesson?: Link
   notes?: string
+  /** id da library_entry do usuário (só em views pessoais — p/ editar/remover). */
+  entryId?: string
+  /** nota privada do usuário sobre a música (não canônica). */
+  personalNote?: string
 }
 
 // ── Mapas do catálogo (estáticos) ────────────────────────────────────────────

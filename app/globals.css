@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@theme {
+  /* Muted Earthen Dark Palette (OKLCH) */
+  --color-ink: oklch(0.15 0.01 80);        /* warm near-black */
+  --color-paper: oklch(0.88 0.02 80);      /* warm off-white */
+  --color-patina: oklch(0.62 0.04 60);     /* muted warm tan — WCAG AA compliant on ink */
+  --color-moss: oklch(0.45 0.03 130);      /* muted deep green */
+  --color-ash: oklch(0.60 0.02 90);        /* muted gray-brown — WCAG AA compliant on ink */
+
+  /* Font Families */
+  --font-serif-jp: var(--font-shippori-mincho);
+  --font-serif-latin: Georgia, serif;
+  --font-sans: system-ui, sans-serif;
+
+  /* Generous Spacing Scale (ma / 間) */
+  --spacing-section: 8rem;   /* between sections */
+  --spacing-breath: 4rem;    /* within sections */
+  --spacing-pause: 2rem;     /* between elements */
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-serif-latin);
+}
+
+@layer base {
+  *:focus-visible {
+    outline: 2px solid var(--color-patina);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}

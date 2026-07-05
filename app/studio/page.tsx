@@ -70,6 +70,13 @@ export default async function StudioPage() {
           Digite título + artista, a IA preenche a ficha, você revisa e salva. Um projeto vivo — atualize
           conforme sua evolução.
         </p>
+        <Link
+          href="/practice"
+          className="mt-5 inline-block rounded-md px-4 py-2 text-sm text-[color:var(--color-ink)]"
+          style={{ background: 'var(--color-patina)' }}
+        >
+          Practice →
+        </Link>
       </header>
 
       <PersonalLibrary initialSongs={songs} />

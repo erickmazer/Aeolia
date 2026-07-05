@@ -3,7 +3,7 @@
 
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import { createClient } from '@/lib/supabase/server'
-import type { Song, Status, Difficulty, TechniqueId, ContextId } from './data'
+import type { Song, Status, Difficulty, TechniqueId, ContextId, Section } from './data'
 import { SEED_SONGS } from './seed-songs'
 
 // Uma library_entry com a música canônica embutida (join via FK song_id).
@@ -27,11 +27,12 @@ interface EntryRow {
   personal_note: string | null
   prerequisite_song_ids: string[] | null
   next_song_ids: string[] | null
+  sections: Section[] | null
   canonical: CanonicalRow | null
 }
 
 const ENTRY_SELECT =
-  'id, status, personal_note, prerequisite_song_ids, next_song_ids, canonical:canonical_songs(*)'
+  'id, status, personal_note, prerequisite_song_ids, next_song_ids, sections, canonical:canonical_songs(*)'
 
 function entryToSong(e: EntryRow): Song | null {
   const c = e.canonical
@@ -55,6 +56,7 @@ function entryToSong(e: EntryRow): Song | null {
     notes: c.notes ?? undefined,
     entryId: e.id,
     personalNote: e.personal_note ?? undefined,
+    sections: e.sections ?? [],
   }
 }
 

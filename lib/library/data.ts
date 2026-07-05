@@ -118,6 +118,29 @@ export interface Song {
   entryId?: string
   /** nota privada do usuário sobre a música (não canônica). */
   personalNote?: string
+  /** partes/seções da música e o progresso do usuário em cada uma. */
+  sections?: Section[]
+}
+
+// ── Progresso por partes (issue #5) ──────────────────────────────────────────
+export type SectionStatus = 'a-fazer' | 'praticando' | 'dominada'
+
+export interface Section {
+  id: string
+  name: string
+  status: SectionStatus
+}
+
+export const SECTION_STATUS_LABEL: Record<SectionStatus, string> = {
+  'a-fazer': 'A fazer',
+  praticando: 'Praticando',
+  dominada: 'Dominada',
+}
+
+/** Fração de partes dominadas (0–1). 0 se não há partes. */
+export function sectionProgress(sections: Section[] | undefined): number {
+  if (!sections || sections.length === 0) return 0
+  return sections.filter((s) => s.status === 'dominada').length / sections.length
 }
 
 // ── Mapas do catálogo (estáticos) ────────────────────────────────────────────

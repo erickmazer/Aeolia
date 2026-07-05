@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Library } from './library'
 import { AddSong } from './add-song'
-import type { Song, Difficulty, TechniqueId, ContextId } from '@/lib/library/data'
+import type { Song, Difficulty, TechniqueId, ContextId, Section } from '@/lib/library/data'
 import type { FicheDraft } from '@/lib/library/fiche-ai'
 import type { SongFit, Suggestion, PersonalizationResult } from '@/lib/library/personalization'
 
@@ -24,6 +24,14 @@ export function PersonalLibrary({ initialSongs }: { initialSongs: Song[] }) {
     const supabase = createClient()
     const { error } = await supabase.from('library_entries').delete().eq('id', song.entryId)
     if (!error) setSongs((cur) => cur.filter((s) => s.entryId !== song.entryId))
+  }
+
+  // Atualiza as partes/seções da música (progresso) e persiste na entry.
+  async function handleSectionsChange(song: Song, sections: Section[]) {
+    if (!song.entryId) return
+    setSongs((cur) => cur.map((s) => (s.entryId === song.entryId ? { ...s, sections } : s)))
+    const supabase = createClient()
+    await supabase.from('library_entries').update({ sections }).eq('id', song.entryId)
   }
 
   // Adiciona uma música (título+artista): reusa o fluxo de dedup/gerar + RPC.
@@ -167,7 +175,7 @@ export function PersonalLibrary({ initialSongs }: { initialSongs: Song[] }) {
         )}
       </section>
 
-      <Library songs={songs} editable onDelete={handleDelete} fit={fit} />
+      <Library songs={songs} editable onDelete={handleDelete} fit={fit} onSectionsChange={handleSectionsChange} />
     </div>
   )
 }

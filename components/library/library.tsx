@@ -17,8 +17,26 @@ import {
   type TechniqueId,
   type ContextId,
 } from '@/lib/library/data'
+import { RELATIVE_DIFFICULTY_LABEL, type SongFit } from '@/lib/library/personalization'
 
 type ById = Record<string, Song>
+
+// Selo de dificuldade RELATIVA ao nível do usuário (vem da personalização).
+function RelFitPill({ rd }: { rd: SongFit['relativeDifficulty'] }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs tracking-wide"
+      style={{
+        color: 'var(--color-moss)',
+        background: 'color-mix(in oklch, var(--color-moss) 12%, transparent)',
+        border: '1px solid color-mix(in oklch, var(--color-moss) 40%, transparent)',
+      }}
+      title="Dificuldade relativa ao seu nível"
+    >
+      {RELATIVE_DIFFICULTY_LABEL[rd]}
+    </span>
+  )
+}
 
 // ── Pequenos átomos visuais ─────────────────────────────────────────────────
 
@@ -139,6 +157,7 @@ function SongCard({
   onPickTechnique,
   editable,
   onDelete,
+  fit,
 }: {
   song: Song
   byId: ById
@@ -147,6 +166,7 @@ function SongCard({
   onPickTechnique: (id: TechniqueId) => void
   editable?: boolean
   onDelete?: (song: Song) => void
+  fit?: SongFit
 }) {
   return (
     <li
@@ -171,6 +191,7 @@ function SongCard({
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <StatusPill status={song.status} />
             <DifficultyDots level={song.difficulty} />
+            {fit && <RelFitPill rd={fit.relativeDifficulty} />}
           </div>
         </div>
         <span
@@ -273,10 +294,12 @@ export function Library({
   songs,
   editable,
   onDelete,
+  fit,
 }: {
   songs: Song[]
   editable?: boolean
   onDelete?: (song: Song) => void
+  fit?: Record<string, SongFit>
 }) {
   const [statusFilter, setStatusFilter] = useState<Status | null>(null)
   const [techniqueFilter, setTechniqueFilter] = useState<TechniqueId | null>(null)
@@ -468,6 +491,7 @@ export function Library({
                 onPickTechnique={pickTechnique}
                 editable={editable}
                 onDelete={onDelete}
+                fit={fit?.[song.id]}
               />
             ))}
           </ul>

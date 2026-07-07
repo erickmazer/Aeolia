@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { shipporiMincho } from "@/lib/fonts";
@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   description:
     "Aeolia — plataforma para músicos organizarem repertório, técnicas e a evolução dos seus estudos.",
   robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1c1a17",
 };
 
 export default function RootLayout({

@@ -1,0 +1,85 @@
+import { NextResponse } from 'next/server'
+import Anthropic from '@anthropic-ai/sdk'
+import { isSupabaseConfigured } from '@/lib/supabase/env'
+import { createClient } from '@/lib/supabase/server'
+import { getMySongs } from '@/lib/library/queries'
+import { deriveSignal } from '@/lib/library/signal'
+import {
+  buildPersonalizationPrompt,
+  personalizationSchema,
+  PERSONALIZATION_MODEL,
+  type SongFit,
+  type PersonalizationResult,
+} from '@/lib/library/personalization'
+import type { Song } from '@/lib/library/data'
+
+export const runtime = 'nodejs'
+
+/**
+ * Personalização por IA: fit + dificuldade relativa por música e sugestões de
+ * próximas. Protegida (só logado). Computa sob demanda e cacheia o fit por
+ * música em library_entries.personalization (best-effort).
+ */
+export async function POST() {
+  if (!isSupabaseConfigured) {
+    return NextResponse.json({ error: 'Supabase não configurado.' }, { status: 503 })
+  }
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Faça login.' }, { status: 401 })
+  }
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({ error: 'ANTHROPIC_API_KEY não configurada no servidor.' }, { status: 503 })
+  }
+
+  const songs = (await getMySongs()) ?? []
+  const signal = deriveSignal(songs)
+
+  try {
+    const client = new Anthropic()
+    const response = await client.messages.create({
+      model: PERSONALIZATION_MODEL,
+      max_tokens: 2000,
+      output_config: { format: { type: 'json_schema', schema: personalizationSchema } },
+      messages: [{ role: 'user', content: buildPersonalizationPrompt(signal, songs) }],
+    })
+
+    const block = response.content.find((b) => b.type === 'text')
+    if (!block || block.type !== 'text') {
+      return NextResponse.json({ error: 'O modelo não retornou a personalização.' }, { status: 502 })
+    }
+
+    const raw = JSON.parse(block.text) as {
+      perSong: SongFit[]
+      suggestions: PersonalizationResult['suggestions']
+    }
+
+    const perSong: Record<string, SongFit> = {}
+    for (const fit of raw.perSong ?? []) perSong[fit.songId] = fit
+
+    // Cache best-effort: grava o fit em cada library_entry (RLS: só as suas).
+    const byId = new Map<string, Song>(songs.map((s) => [s.id, s]))
+    const now = new Date().toISOString()
+    await Promise.all(
+      Object.values(perSong).map((fit) => {
+        const song = byId.get(fit.songId)
+        if (!song?.entryId) return Promise.resolve()
+        return supabase
+          .from('library_entries')
+          .update({ personalization: fit, personalization_at: now })
+          .eq('id', song.entryId)
+          .then(() => undefined)
+      }),
+    ).catch(() => {})
+
+    const result: PersonalizationResult = { perSong, suggestions: raw.suggestions ?? [] }
+    return NextResponse.json(result)
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Falha ao personalizar.'
+    return NextResponse.json({ error: message }, { status: 502 })
+  }
+}

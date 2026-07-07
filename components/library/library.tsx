@@ -16,9 +16,29 @@ import {
   type Status,
   type TechniqueId,
   type ContextId,
+  type Section,
 } from '@/lib/library/data'
+import { RELATIVE_DIFFICULTY_LABEL, type SongFit } from '@/lib/library/personalization'
+import { SectionsBlock, ProgressBar } from './sections'
 
 type ById = Record<string, Song>
+
+// Selo de dificuldade RELATIVA ao nível do usuário (vem da personalização).
+function RelFitPill({ rd }: { rd: SongFit['relativeDifficulty'] }) {
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs tracking-wide"
+      style={{
+        color: 'var(--color-moss)',
+        background: 'color-mix(in oklch, var(--color-moss) 12%, transparent)',
+        border: '1px solid color-mix(in oklch, var(--color-moss) 40%, transparent)',
+      }}
+      title="Dificuldade relativa ao seu nível"
+    >
+      {RELATIVE_DIFFICULTY_LABEL[rd]}
+    </span>
+  )
+}
 
 // ── Pequenos átomos visuais ─────────────────────────────────────────────────
 
@@ -139,6 +159,8 @@ function SongCard({
   onPickTechnique,
   editable,
   onDelete,
+  fit,
+  onSectionsChange,
 }: {
   song: Song
   byId: ById
@@ -147,6 +169,8 @@ function SongCard({
   onPickTechnique: (id: TechniqueId) => void
   editable?: boolean
   onDelete?: (song: Song) => void
+  fit?: SongFit
+  onSectionsChange?: (song: Song, sections: Section[]) => void
 }) {
   return (
     <li
@@ -171,7 +195,11 @@ function SongCard({
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <StatusPill status={song.status} />
             <DifficultyDots level={song.difficulty} />
+            {fit && <RelFitPill rd={fit.relativeDifficulty} />}
           </div>
+          {song.sections && song.sections.length > 0 && (
+            <div className="mt-2"><ProgressBar sections={song.sections} /></div>
+          )}
         </div>
         <span
           className="shrink-0 text-[color:var(--color-ash)] transition-transform"
@@ -187,6 +215,7 @@ function SongCard({
           className="space-y-5 border-t px-4 py-5 sm:px-5"
           style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 15%, transparent)' }}
         >
+          <SectionsBlock song={song} editable={editable} onChange={(secs) => onSectionsChange?.(song, secs)} />
           <FicheRow label="Técnicas">
             <div className="flex flex-wrap gap-2">
               {song.techniques.map((t) => (
@@ -273,10 +302,14 @@ export function Library({
   songs,
   editable,
   onDelete,
+  fit,
+  onSectionsChange,
 }: {
   songs: Song[]
   editable?: boolean
   onDelete?: (song: Song) => void
+  fit?: Record<string, SongFit>
+  onSectionsChange?: (song: Song, sections: Section[]) => void
 }) {
   const [statusFilter, setStatusFilter] = useState<Status | null>(null)
   const [techniqueFilter, setTechniqueFilter] = useState<TechniqueId | null>(null)
@@ -468,6 +501,8 @@ export function Library({
                 onPickTechnique={pickTechnique}
                 editable={editable}
                 onDelete={onDelete}
+                fit={fit?.[song.id]}
+                onSectionsChange={onSectionsChange}
               />
             ))}
           </ul>

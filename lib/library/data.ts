@@ -37,13 +37,11 @@ export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
 export type TechniqueId =
   | 'fingerstyle'
   | 'travis-picking'
-  | 'independencia-mao-direita'
+  | 'baixos-alternados'
+  | 'independencia'
   | 'bossa-nova'
-  | 'harmonicos'
-  | 'percussao'
-  | 'voicings'
-  | 'improvisacao'
-  | 'cantar-tocando'
+  | 'harmonia'
+  | 'dinamica'
 
 export interface Technique {
   id: TechniqueId
@@ -54,13 +52,24 @@ export interface Technique {
 export const TECHNIQUES: Technique[] = [
   { id: 'fingerstyle', name: 'Fingerstyle', blurb: 'Dedilhar melodia, baixo e harmonia ao mesmo tempo.' },
   { id: 'travis-picking', name: 'Travis Picking', blurb: 'Baixo alternado com o polegar sob a melodia.' },
-  { id: 'independencia-mao-direita', name: 'Independência da mão direita', blurb: 'Cada dedo com sua própria voz e ritmo.' },
+  { id: 'baixos-alternados', name: 'Baixos alternados', blurb: 'Polegar alternando tônica e quinta — base de folk/country.' },
+  { id: 'independencia', name: 'Independência', blurb: 'Cada mão (e dedo) com sua própria voz e ritmo.' },
   { id: 'bossa-nova', name: 'Bossa Nova', blurb: 'A batida sincopada e o balanço da mão direita.' },
-  { id: 'harmonicos', name: 'Harmônicos', blurb: 'Naturais e artificiais — o brilho de sino.' },
-  { id: 'percussao', name: 'Percussão no violão', blurb: 'Usar o corpo do instrumento como um tambor.' },
-  { id: 'voicings', name: 'Voicings e acordes sofisticados', blurb: 'Tensões, inversões e cores fora do básico.' },
-  { id: 'improvisacao', name: 'Improvisação', blurb: 'Frasear livre sobre a harmonia.' },
-  { id: 'cantar-tocando', name: 'Cantar enquanto toca', blurb: 'Manter a voz firme com a mão em outro ritmo.' },
+  { id: 'harmonia', name: 'Harmonia', blurb: 'Campos, tensões, inversões — entender por que funciona.' },
+  { id: 'dinamica', name: 'Dinâmica', blurb: 'Controle de volume e intenção — do pianíssimo ao forte.' },
+]
+
+// ── Skills = as 7 técnicas + fundamentos (para exercícios e XP) ──────────────
+export type SkillId = TechniqueId | 'troca-acordes' | 'ritmo'
+export interface Skill {
+  id: SkillId
+  name: string
+  tipo: 'tecnica' | 'fundamento'
+}
+export const SKILLS: Skill[] = [
+  ...TECHNIQUES.map((t) => ({ id: t.id as SkillId, name: t.name, tipo: 'tecnica' as const })),
+  { id: 'troca-acordes', name: 'Troca de acordes', tipo: 'fundamento' },
+  { id: 'ritmo', name: 'Ritmo', tipo: 'fundamento' },
 ]
 
 // ── Contextos ─────────────────────────────────────────────────────────────

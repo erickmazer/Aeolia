@@ -139,3 +139,17 @@ export async function getMySongs(): Promise<Song[] | null> {
     .filter((s): s is Song => s !== null)
   return sortSongs(songs)
 }
+
+/** Níveis de treino de exercícios do usuário logado (exercise_id → 0..3). */
+export async function getMyExercises(): Promise<Record<string, number>> {
+  const user = await getCurrentUser()
+  if (!user) return {}
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('user_exercises')
+    .select('exercise_id, level')
+    .eq('user_id', user.id)
+  const out: Record<string, number> = {}
+  for (const r of (data ?? []) as { exercise_id: string; level: number }[]) out[r.exercise_id] = r.level
+  return out
+}

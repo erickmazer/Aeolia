@@ -1,11 +1,12 @@
-import { getMySongs } from '@/lib/library/queries'
+import { getCurrentUser, getMyExercises, getMySongs } from '@/lib/library/queries'
 import { deriveSkillXp } from '@/lib/library/skills'
+import { ExercisesPanel } from '@/components/library/exercises-panel'
 
 export const metadata = { title: 'Exercises' }
 
 export default async function ExercisesPage() {
-  const songs = (await getMySongs()) ?? []
-  const skills = deriveSkillXp(songs)
+  const [user, songs, levels] = await Promise.all([getCurrentUser(), getMySongs(), getMyExercises()])
+  const skills = deriveSkillXp(songs ?? [])
   const max = Math.max(1, ...skills.map((s) => s.xp))
 
   return (
@@ -29,10 +30,11 @@ export default async function ExercisesPage() {
           ))}
         </ul>
         <p className="mt-3 text-xs text-[color:var(--color-ash)]">
-          XP derivado das músicas que você toca (status × dificuldade). Exercícios técnicos atrelados a
-          músicas chegam na próxima fatia — vão somar XP aqui também.
+          XP derivado das músicas que você toca (status × dificuldade) + exercícios em treino.
         </p>
       </section>
+
+      {user && <ExercisesPanel userId={user.id} initialLevels={levels} />}
     </div>
   )
 }

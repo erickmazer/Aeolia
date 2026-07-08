@@ -159,6 +159,8 @@ export interface Section {
   id: string
   name: string
   status: SectionStatus
+  /** progressão de acordes da parte (ex.: "C G Am F"). Conhecimento livre. */
+  chords?: string
 }
 
 export const SECTION_STATUS_LABEL: Record<SectionStatus, string> = {

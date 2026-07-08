@@ -8,6 +8,7 @@ import {
   type SectionStatus,
   type Song,
 } from '@/lib/library/data'
+import { ChordRow } from './chord-diagram'
 
 const STATUS_COLOR: Record<SectionStatus, string> = {
   'a-fazer': 'var(--color-ash)',
@@ -73,6 +74,10 @@ export function SectionsBlock({
     commit(sections.filter((s) => s.id !== id))
   }
 
+  function setChords(id: string, value: string) {
+    commit(sections.map((s) => (s.id === id ? { ...s, chords: value || undefined } : s)))
+  }
+
   if (!editable && sections.length === 0) return null
 
   return (
@@ -85,30 +90,42 @@ export function SectionsBlock({
       {sections.length > 0 && (
         <ul className="flex flex-col gap-1.5">
           {sections.map((s) => (
-            <li key={s.id} className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={editable ? () => cycle(s.id) : undefined}
-                disabled={!editable}
-                aria-label={`${s.name}: ${SECTION_STATUS_LABEL[s.status]}${editable ? ' (toque p/ avançar)' : ''}`}
-                className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm transition-colors disabled:cursor-default"
-                style={{ background: editable ? 'color-mix(in oklch, var(--color-paper) 4%, transparent)' : 'transparent' }}
-              >
-                <span className="h-2 w-2 rounded-full" style={{ background: STATUS_COLOR[s.status] }} />
-                <span className="text-[color:var(--color-paper)]/90">{s.name}</span>
-                <span className="text-xs" style={{ color: STATUS_COLOR[s.status] }}>
-                  {SECTION_STATUS_LABEL[s.status]}
-                </span>
-              </button>
-              {editable && (
+            <li key={s.id} className="space-y-2">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => remove(s.id)}
-                  aria-label={`Remover ${s.name}`}
-                  className="text-xs text-[color:var(--color-ash)] transition-colors hover:text-[color:oklch(0.6_0.15_25)]"
+                  onClick={editable ? () => cycle(s.id) : undefined}
+                  disabled={!editable}
+                  aria-label={`${s.name}: ${SECTION_STATUS_LABEL[s.status]}${editable ? ' (toque p/ avançar)' : ''}`}
+                  className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm transition-colors disabled:cursor-default"
+                  style={{ background: editable ? 'color-mix(in oklch, var(--color-paper) 4%, transparent)' : 'transparent' }}
                 >
-                  ✕
+                  <span className="h-2 w-2 rounded-full" style={{ background: STATUS_COLOR[s.status] }} />
+                  <span className="text-[color:var(--color-paper)]/90">{s.name}</span>
+                  <span className="text-xs" style={{ color: STATUS_COLOR[s.status] }}>
+                    {SECTION_STATUS_LABEL[s.status]}
+                  </span>
                 </button>
+                {editable && (
+                  <button
+                    type="button"
+                    onClick={() => remove(s.id)}
+                    aria-label={`Remover ${s.name}`}
+                    className="text-xs text-[color:var(--color-ash)] transition-colors hover:text-[color:oklch(0.6_0.15_25)]"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+              {s.chords && <ChordRow chords={s.chords} />}
+              {editable && (
+                <input
+                  value={s.chords ?? ''}
+                  onChange={(e) => setChords(s.id, e.target.value)}
+                  placeholder="acordes: C G Am F"
+                  className="w-full max-w-xs rounded-md border bg-transparent px-2 py-1 text-sm text-[color:var(--color-paper)] placeholder:text-[color:var(--color-ash)]"
+                  style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 22%, transparent)' }}
+                />
               )}
             </li>
           ))}

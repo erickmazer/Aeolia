@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { sectionProgress, type Section, type SectionStatus, type Song } from '@/lib/library/data'
+import { ChordRow } from './chord-diagram'
 
 // Product surface em inglês (produto pensado global).
 const EN_STATUS: Record<SectionStatus, string> = {
@@ -121,6 +122,11 @@ export function PracticeMode({ initialSongs }: { initialSongs: Song[] }) {
                   {EN_STATUS[s.status]}
                 </span>
               </button>
+              {s.chords && (
+                <div className="mt-2 px-1">
+                  <ChordRow chords={s.chords} />
+                </div>
+              )}
             </li>
           ))}
         </ul>

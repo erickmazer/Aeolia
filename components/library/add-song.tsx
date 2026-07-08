@@ -4,16 +4,14 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   TECHNIQUES,
-  CONTEXTS,
+  GENRES,
   STATUSES,
   DIFFICULTY_LABELS,
   TECHNIQUE_BY_ID,
-  CONTEXT_BY_ID,
   type Song,
   type Status,
   type Difficulty,
   type TechniqueId,
-  type ContextId,
 } from '@/lib/library/data'
 import type { FicheDraft } from '@/lib/library/fiche-ai'
 
@@ -120,7 +118,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
           _artist: draft.artist,
           _difficulty: draft.difficulty,
           _techniques: draft.techniques,
-          _contexts: draft.contexts,
+          _genre: draft.genre,
           _best_version_label: draft.bestVersion?.label ?? null,
           _best_version_url: draft.bestVersion?.url ?? null,
           _best_lesson_label: draft.bestLesson?.label ?? null,
@@ -138,7 +136,8 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
         difficulty: draft.difficulty as Difficulty,
         status: draft.status,
         techniques: draft.techniques as TechniqueId[],
-        contexts: draft.contexts as ContextId[],
+        contexts: [],
+        genre: draft.genre,
         prerequisites: [],
         nextSongs: [],
         bestVersion: draft.bestVersion,
@@ -211,10 +210,8 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
               ))}
             </div>
           )}
-          {existing.contexts.length > 0 && (
-            <p className="text-sm text-[color:var(--color-paper)]/80">
-              {existing.contexts.map((c) => CONTEXT_BY_ID[c]?.name ?? c).join(' · ')}
-            </p>
+          {existing.genre && (
+            <p className="text-sm text-[color:var(--color-paper)]/80">{existing.genre}</p>
           )}
           {existing.notes && (
             <p className="max-w-prose text-sm italic leading-relaxed text-[color:var(--color-paper)]/85">{existing.notes}</p>
@@ -304,29 +301,19 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
             </div>
           </div>
 
-          <div>
-            <div className="mb-2 text-xs uppercase tracking-widest text-[color:var(--color-ash)]">Contextos</div>
-            <div className="flex flex-wrap gap-2">
-              {CONTEXTS.map((c) => {
-                const active = draft.contexts.includes(c.id)
-                return (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setDraft({ ...draft, contexts: toggle(draft.contexts, c.id) })}
-                    className="rounded-full px-3 py-1 text-sm transition-colors"
-                    style={{
-                      color: active ? 'var(--color-ink)' : 'var(--color-paper)',
-                      background: active ? 'var(--color-patina)' : 'color-mix(in oklch, var(--color-paper) 5%, transparent)',
-                      border: `1px solid color-mix(in oklch, var(--color-ash) ${active ? 0 : 25}%, transparent)`,
-                    }}
-                  >
-                    {c.name}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+          <label className="flex flex-col gap-1 text-xs uppercase tracking-widest text-[color:var(--color-ash)]">
+            Gênero
+            <select
+              className={inputClass}
+              style={borderStyle}
+              value={draft.genre}
+              onChange={(e) => setDraft({ ...draft, genre: e.target.value })}
+            >
+              {GENRES.map((g) => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+          </label>
 
           <label className="block">
             <span className="mb-2 block text-xs uppercase tracking-widest text-[color:var(--color-ash)]">Observações</span>

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Library } from './library'
 import { AddSong } from './add-song'
-import type { Song, Difficulty, TechniqueId, ContextId, Section } from '@/lib/library/data'
+import type { Song, Difficulty, TechniqueId, Section } from '@/lib/library/data'
 import type { FicheDraft } from '@/lib/library/fiche-ai'
 import type { SongFit, Suggestion, PersonalizationResult } from '@/lib/library/personalization'
 
@@ -60,7 +60,7 @@ export function PersonalLibrary({ initialSongs }: { initialSongs: Song[] }) {
         _artist: draft.artist,
         _difficulty: draft.difficulty,
         _techniques: draft.techniques,
-        _contexts: draft.contexts,
+        _genre: draft.genre,
         _best_version_label: draft.bestVersion?.label ?? null,
         _best_version_url: draft.bestVersion?.url ?? null,
         _best_lesson_label: draft.bestLesson?.label ?? null,
@@ -77,7 +77,8 @@ export function PersonalLibrary({ initialSongs }: { initialSongs: Song[] }) {
       difficulty: draft.difficulty as Difficulty,
       status: 'quero-aprender',
       techniques: draft.techniques as TechniqueId[],
-      contexts: draft.contexts as ContextId[],
+      contexts: [],
+      genre: draft.genre,
       prerequisites: [],
       nextSongs: [],
       bestVersion: draft.bestVersion,

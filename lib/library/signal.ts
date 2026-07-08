@@ -1,7 +1,7 @@
 // Sinal do usuário — derivado da biblioteca, SEM IA.
 // Entrada da personalização (e ponto de override da futura mecânica de "refinar").
 
-import type { Song, TechniqueId, ContextId, Difficulty } from './data'
+import type { Song, TechniqueId, Difficulty } from './data'
 
 export type Momento = 'inicio' | 'avancando' | 'consolidando'
 
@@ -20,7 +20,7 @@ export interface UserSignal {
   encarando: number
   momento: Momento
   gostoTecnicas: WeightedTag<TechniqueId>[]
-  gostoContextos: WeightedTag<ContextId>[]
+  gostoGeneros: WeightedTag<string>[]
 }
 
 const STATUS_WEIGHT: Record<Song['status'], number> = {
@@ -53,11 +53,11 @@ export function deriveSignal(songs: Song[]): UserSignal {
   const encarando = Math.max(nivel, maxAprendendo) as Difficulty | number
 
   const tecCounts = new Map<TechniqueId, number>()
-  const ctxCounts = new Map<ContextId, number>()
+  const genCounts = new Map<string, number>()
   for (const s of songs) {
     const w = STATUS_WEIGHT[s.status]
     for (const t of s.techniques) tecCounts.set(t, (tecCounts.get(t) ?? 0) + w)
-    for (const c of s.contexts) ctxCounts.set(c, (ctxCounts.get(c) ?? 0) + w)
+    if (s.genre) genCounts.set(s.genre, (genCounts.get(s.genre) ?? 0) + w)
   }
 
   const ratio = total > 0 ? dominadas / total : 0
@@ -71,6 +71,6 @@ export function deriveSignal(songs: Song[]): UserSignal {
     encarando,
     momento,
     gostoTecnicas: topTags(tecCounts, 5),
-    gostoContextos: topTags(ctxCounts, 5),
+    gostoGeneros: topTags(genCounts, 5),
   }
 }

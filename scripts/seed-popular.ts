@@ -20,7 +20,7 @@ import { writeFileSync } from 'node:fs'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
 import { buildFichePrompt, ficheSchema, FICHE_MODEL, type FicheDraft } from '../lib/library/fiche-ai'
-import { TECHNIQUE_IDS, CONTEXT_IDS } from '../lib/library/data'
+import { TECHNIQUE_IDS } from '../lib/library/data'
 
 // Lista curada de músicas populares (violão/fingerstyle + pop/MPB/rock).
 // Expanda à vontade — é a semente do catálogo comunitário.
@@ -130,25 +130,21 @@ async function main() {
 
   // ── Auditoria de schema ─────────────────────────────────────────────────
   const tecUse = new Map<string, number>(TECHNIQUE_IDS.map((id) => [id, 0]))
-  const ctxUse = new Map<string, number>(CONTEXT_IDS.map((id) => [id, 0]))
+  const genUse = new Map<string, number>()
   let emptyTec = 0
-  let emptyCtx = 0
   for (const r of good) {
     if (!r.fiche.techniques?.length) emptyTec++
-    if (!r.fiche.contexts?.length) emptyCtx++
     for (const t of r.fiche.techniques ?? []) tecUse.set(t, (tecUse.get(t) ?? 0) + 1)
-    for (const c of r.fiche.contexts ?? []) ctxUse.set(c, (ctxUse.get(c) ?? 0) + 1)
+    if (r.fiche.genre) genUse.set(r.fiche.genre, (genUse.get(r.fiche.genre) ?? 0) + 1)
   }
   const neverTec = [...tecUse].filter(([, n]) => n === 0).map(([id]) => id)
-  const neverCtx = [...ctxUse].filter(([, n]) => n === 0).map(([id]) => id)
 
   console.log('\n=== AUDITORIA DE SCHEMA ===')
   console.log(`Geradas: ${good.length}/${POPULAR.length} (falhas: ${bad.length})`)
   console.log('Uso de técnicas:', Object.fromEntries(tecUse))
-  console.log('Uso de contextos:', Object.fromEntries(ctxUse))
+  console.log('Distribuição de gêneros:', Object.fromEntries(genUse))
   if (neverTec.length) console.log('⚠️ Técnicas NUNCA usadas (candidatas a remover):', neverTec.join(', '))
-  if (neverCtx.length) console.log('⚠️ Contextos NUNCA usados (candidatos a remover):', neverCtx.join(', '))
-  console.log(`⚠️ Fichas sem técnica: ${emptyTec} · sem contexto: ${emptyCtx} (alto = falta granularidade/campo)`)
+  console.log(`⚠️ Fichas sem técnica: ${emptyTec} (alto = falta granularidade/campo)`)
   if (bad.length) console.log('Falhas:', bad.map((b) => `${b.title} — ${b.artist}`).join('; '))
   console.log('Dica: campos que a taxonomia atual não captura (tom, afinação, capo, BPM, acordes, ano) aparecem como "chute" nas notes.')
 
@@ -174,7 +170,7 @@ async function main() {
         artist: g.fiche.artist,
         difficulty: g.fiche.difficulty,
         techniques: g.fiche.techniques,
-        contexts: g.fiche.contexts,
+        genre: g.fiche.genre,
         best_version_label: g.fiche.bestVersion?.label ?? null,
         best_version_url: g.fiche.bestVersion?.url ?? null,
         best_lesson_label: g.fiche.bestLesson?.label ?? null,

@@ -3,7 +3,7 @@
 
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import { createClient } from '@/lib/supabase/server'
-import type { Song, Status, Difficulty, TechniqueId, ContextId, Section } from './data'
+import type { Song, Status, Difficulty, TechniqueId, ContextId, Section, Priority, Stage } from './data'
 import { SEED_SONGS } from './seed-songs'
 
 // Uma library_entry com a música canônica embutida (join via FK song_id).
@@ -14,6 +14,7 @@ interface CanonicalRow {
   difficulty: number
   techniques: string[] | null
   contexts: string[] | null
+  genre: string | null
   best_version_label: string | null
   best_version_url: string | null
   best_lesson_label: string | null
@@ -28,23 +29,40 @@ interface EntryRow {
   prerequisite_song_ids: string[] | null
   next_song_ids: string[] | null
   sections: Section[] | null
+  collections: string[] | null
+  priority: string | null
+  stage: string | null
+  overrides: { dif?: number; techs?: string[]; genre?: string; notes?: string } | null
   canonical: CanonicalRow | null
 }
 
 const ENTRY_SELECT =
-  'id, status, personal_note, prerequisite_song_ids, next_song_ids, sections, canonical:canonical_songs(*)'
+  'id, status, personal_note, prerequisite_song_ids, next_song_ids, sections, collections, priority, stage, overrides, canonical:canonical_songs(*)'
 
+// Deriva o status das seções quando existem (fonte única de verdade):
+// todas dominada → dominada; alguma começada → aprendendo; senão → o status salvo.
+function deriveStatus(sections: Section[], stored: string): Status {
+  if (sections.length === 0) return stored as Status
+  if (sections.every((x) => x.status === 'dominada')) return 'dominada'
+  if (sections.some((x) => x.status !== 'a-fazer')) return 'aprendendo'
+  return 'quero-aprender'
+}
+
+// eff(): a faixa efetiva = canônica + overrides pessoais (privado ganha).
 function entryToSong(e: EntryRow): Song | null {
   const c = e.canonical
   if (!c) return null
+  const o = e.overrides ?? {}
+  const sections = e.sections ?? []
   return {
     id: c.id,
     title: c.title,
     artist: c.artist,
-    difficulty: c.difficulty as Difficulty,
-    status: e.status as Status,
-    techniques: (c.techniques ?? []) as TechniqueId[],
+    difficulty: (o.dif ?? c.difficulty) as Difficulty,
+    status: deriveStatus(sections, e.status),
+    techniques: ((o.techs ?? c.techniques) ?? []) as TechniqueId[],
     contexts: (c.contexts ?? []) as ContextId[],
+    genre: o.genre ?? c.genre ?? undefined,
     prerequisites: e.prerequisite_song_ids ?? [],
     nextSongs: e.next_song_ids ?? [],
     bestVersion: c.best_version_url
@@ -53,10 +71,13 @@ function entryToSong(e: EntryRow): Song | null {
     bestLesson: c.best_lesson_url
       ? { label: c.best_lesson_label ?? 'estudar', url: c.best_lesson_url }
       : undefined,
-    notes: c.notes ?? undefined,
+    notes: o.notes ?? c.notes ?? undefined,
     entryId: e.id,
     personalNote: e.personal_note ?? undefined,
-    sections: e.sections ?? [],
+    sections,
+    collections: e.collections ?? [],
+    priority: (e.priority as Priority | null) ?? null,
+    stage: (e.stage as Stage) ?? 'biblioteca',
   }
 }
 

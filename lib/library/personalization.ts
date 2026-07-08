@@ -1,7 +1,7 @@
 // Personalização por IA: fit + dificuldade relativa por música e sugestões de
 // próximas. Puro (sem SDK) — a rota /api/personalize monta o cliente e chama.
 
-import { TECHNIQUES, CONTEXTS, TECHNIQUE_BY_ID, CONTEXT_BY_ID, type Song } from './data'
+import { TECHNIQUES, TECHNIQUE_BY_ID, type Song } from './data'
 import type { UserSignal } from './signal'
 
 export type RelativeDifficulty = 'confortavel' | 'um-degrau-acima' | 'desafio' | 'cedo-demais'
@@ -86,12 +86,11 @@ function tagList(tags: { id: string; score: number }[], byId: Record<string, { n
 
 export function buildPersonalizationPrompt(signal: UserSignal, songs: Song[]): string {
   const catalogTec = TECHNIQUES.map((t) => `${t.id}: ${t.name}`).join(', ')
-  const catalogCtx = CONTEXTS.map((c) => `${c.id}: ${c.name}`).join(', ')
 
   const lib = songs
     .map(
       (s) =>
-        `- id=${s.id} | "${s.title}" — ${s.artist} | dificuldade ${s.difficulty}/5 | status ${s.status} | técnicas: ${s.techniques.join(', ') || '—'} | contextos: ${s.contexts.join(', ') || '—'}`,
+        `- id=${s.id} | "${s.title}" — ${s.artist} | dificuldade ${s.difficulty}/5 | status ${s.status} | gênero: ${s.genre ?? '—'} | técnicas: ${s.techniques.join(', ') || '—'}`,
     )
     .join('\n')
 
@@ -101,13 +100,12 @@ PERFIL DO ALUNO (derivado da biblioteca):
 - Nível estimado: ${signal.nivel}/5 (encarando dificuldade ${signal.encarando}/5).
 - Momento: ${signal.momento} (${signal.dominadas} dominadas de ${signal.total}).
 - Gosto por técnicas: ${tagList(signal.gostoTecnicas, TECHNIQUE_BY_ID)}.
-- Gosto por contextos: ${tagList(signal.gostoContextos, CONTEXT_BY_ID)}.
+- Gosto por gêneros: ${signal.gostoGeneros.map((g) => `${g.id} (${g.score})`).join(', ') || '(nenhum ainda)'}.
 
 BIBLIOTECA ATUAL (${songs.length} músicas):
 ${lib || '(vazia — o aluno está começando)'}
 
 Catálogo de técnicas (ids): ${catalogTec}
-Catálogo de contextos (ids): ${catalogCtx}
 
 TAREFAS:
 1) "perSong": para CADA música da biblioteca (use o id exato fornecido), avalie:

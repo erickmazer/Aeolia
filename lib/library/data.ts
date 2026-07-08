@@ -92,6 +92,28 @@ export const CONTEXTS: Context[] = [
   { id: 'bosses', name: 'Grandes desafios ("Bosses")', blurb: 'As que exigem meses. O objetivo do horizonte.' },
 ]
 
+// ── Gênero (canônico, single) — item 1: eixo separado dos contextos ──────────
+export const GENRES = [
+  'MPB', 'Bossa Nova', 'Folk', 'Indie', 'Instrumental', 'Rock', 'Pop',
+  'Blues', 'Sertanejo', 'Samba', 'Jazz', 'Clássico', 'Country', 'Infantil',
+] as const
+
+// ── Prioridade de aprendizado (privado) — NÃO confundir com status ──────────
+export type Priority = 'agora' | 'proxima' | 'algumdia'
+export const PRIORITIES: { id: Priority; label: string; color: string }[] = [
+  { id: 'agora', label: 'Agora', color: 'var(--color-patina)' },
+  { id: 'proxima', label: 'Próxima', color: 'var(--color-moss)' },
+  { id: 'algumdia', label: 'Algum dia', color: 'var(--color-ash)' },
+]
+
+// ── Stage: ciclo de vida da música na biblioteca (privado) ──────────────────
+export type Stage = 'backlog' | 'biblioteca' | 'arquivada'
+export const STAGES: { id: Stage; label: string }[] = [
+  { id: 'backlog', label: 'Caixa de entrada' },
+  { id: 'biblioteca', label: 'Biblioteca' },
+  { id: 'arquivada', label: 'Arquivada' },
+]
+
 // ── Música (ficha) ──────────────────────────────────────────────────────────
 
 export interface Link {
@@ -120,6 +142,14 @@ export interface Song {
   personalNote?: string
   /** partes/seções da música e o progresso do usuário em cada uma. */
   sections?: Section[]
+  /** gênero canônico (público). Ex.: MPB, Folk, Rock. */
+  genre?: string
+  /** coleções pessoais (labels livres do usuário). Ex.: Aurora, Favoritas. */
+  collections?: string[]
+  /** prioridade de aprendizado (privado). */
+  priority?: Priority | null
+  /** ciclo de vida na biblioteca (privado). */
+  stage?: Stage
 }
 
 // ── Progresso por partes (issue #5) ──────────────────────────────────────────
@@ -156,6 +186,9 @@ export const CONTEXT_BY_ID: Record<ContextId, Context> = Object.fromEntries(
 export const STATUS_BY_ID: Record<Status, StatusMeta> = Object.fromEntries(
   STATUSES.map((s) => [s.id, s]),
 ) as Record<Status, StatusMeta>
+
+export const PRIORITY_BY_ID: Record<Priority, { id: Priority; label: string; color: string }> =
+  Object.fromEntries(PRIORITIES.map((p) => [p.id, p])) as Record<Priority, { id: Priority; label: string; color: string }>
 
 export const TECHNIQUE_IDS = TECHNIQUES.map((t) => t.id)
 export const CONTEXT_IDS = CONTEXTS.map((c) => c.id)

@@ -1,7 +1,7 @@
 // Personalização por IA: fit + dificuldade relativa por música e sugestões de
 // próximas. Puro (sem SDK) — a rota /api/personalize monta o cliente e chama.
 
-import { TECHNIQUES, TECHNIQUE_BY_ID, type Song } from './data'
+import { TECHNIQUES, TECHNIQUE_BY_ID, GENRE_TECHS, type Song } from './data'
 import type { UserSignal } from './signal'
 
 export type RelativeDifficulty = 'confortavel' | 'um-degrau-acima' | 'desafio' | 'cedo-demais'
@@ -101,6 +101,9 @@ PERFIL DO ALUNO (derivado da biblioteca):
 - Momento: ${signal.momento} (${signal.dominadas} dominadas de ${signal.total}).
 - Gosto por técnicas: ${tagList(signal.gostoTecnicas, TECHNIQUE_BY_ID)}.
 - Gosto por gêneros: ${signal.gostoGeneros.map((g) => `${g.id} (${g.score})`).join(', ') || '(nenhum ainda)'}.
+- Técnicas típicas dos gêneros dele: ${signal.gostoGeneros
+    .map((g) => `${g.id} → ${(GENRE_TECHS[g.id] ?? []).map((t) => TECHNIQUE_BY_ID[t]?.name ?? t).join('/') || '—'}`)
+    .join('; ') || '—'}.
 
 BIBLIOTECA ATUAL (${songs.length} músicas):
 ${lib || '(vazia — o aluno está começando)'}

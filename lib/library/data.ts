@@ -72,6 +72,24 @@ export const SKILLS: Skill[] = [
   { id: 'ritmo', name: 'Ritmo', tipo: 'fundamento' },
 ]
 
+// ── Técnicas típicas por gênero (item 7) — semente pra recomendação ─────────
+export const GENRE_TECHS: Record<string, TechniqueId[]> = {
+  MPB: ['harmonia', 'bossa-nova', 'dinamica'],
+  'Bossa Nova': ['bossa-nova', 'harmonia', 'independencia'],
+  Folk: ['fingerstyle', 'travis-picking', 'baixos-alternados'],
+  Indie: ['fingerstyle', 'dinamica', 'harmonia'],
+  Instrumental: ['fingerstyle', 'independencia', 'travis-picking'],
+  Blues: ['baixos-alternados', 'dinamica'],
+  Sertanejo: ['baixos-alternados', 'dinamica'],
+  Samba: ['harmonia', 'dinamica'],
+  Jazz: ['harmonia', 'independencia'],
+  'Clássico': ['fingerstyle', 'independencia', 'dinamica'],
+  Country: ['travis-picking', 'baixos-alternados'],
+  Infantil: ['dinamica', 'harmonia'],
+  Rock: ['dinamica'],
+  Pop: ['harmonia', 'dinamica'],
+}
+
 // ── Contextos ─────────────────────────────────────────────────────────────
 
 export type ContextId =

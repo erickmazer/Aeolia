@@ -4,7 +4,15 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { ProgressBar } from '@/components/library/sections'
+import { LogPractice } from '@/components/library/log-practice'
 import { sectionProgress, type SectionStatus, type Song } from '@/lib/library/data'
+import {
+  computeStreak,
+  practicedToday,
+  daysThisWeek,
+  localDay,
+  type PracticeSummary,
+} from '@/lib/library/practice'
 
 const NEXT_STATUS: Record<SectionStatus, SectionStatus> = {
   'a-fazer': 'praticando',
@@ -31,8 +39,59 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   )
 }
 
-export function TodayCockpit({ initialSongs }: { initialSongs: Song[] }) {
+// Cabeçalho de prática: streak + os últimos 7 dias como pontos (issue #7).
+function StreakHeader({ days }: { days: string[] }) {
+  const today = localDay()
+  const { current } = computeStreak(days, today)
+  const week = daysThisWeek(days, today)
+  const set = new Set(days)
+  const dots = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (6 - i))
+    return set.has(localDay(d))
+  })
+
+  return (
+    <section className="mb-8 flex items-center justify-between">
+      <div>
+        <div className="flex items-baseline gap-2">
+          <span className="font-serif text-3xl text-[color:var(--color-paper)] tabular-nums">
+            {current > 0 ? `${current}` : '—'}
+          </span>
+          <span className="text-sm text-[color:var(--color-ash)]">
+            {current > 0 ? (current === 1 ? 'dia de streak 🔥' : 'dias de streak 🔥') : 'comece um streak hoje'}
+          </span>
+        </div>
+        <div className="mt-1 text-xs text-[color:var(--color-ash)]">
+          {practicedToday(days, today) ? 'praticado hoje ✓' : `${week}/7 dias esta semana`}
+        </div>
+      </div>
+      <div className="flex gap-1.5" aria-hidden>
+        {dots.map((on, i) => (
+          <span
+            key={i}
+            className="h-2 w-2 rounded-full"
+            style={{ background: on ? 'var(--color-patina)' : 'color-mix(in oklch, var(--color-ash) 30%, transparent)' }}
+          />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+export function TodayCockpit({
+  initialSongs,
+  summary,
+}: {
+  initialSongs: Song[]
+  summary: PracticeSummary
+}) {
   const [songs, setSongs] = useState<Song[]>(initialSongs)
+  const [days, setDays] = useState<string[]>(summary.days)
+
+  function addDay(day: string) {
+    setDays((cur) => (cur.includes(day) ? cur : [day, ...cur]))
+  }
 
   const active = songs.filter(isActive).sort((a, b) => sectionProgress(b.sections) - sectionProgress(a.sections))
   const ready = songs.filter((s) => !isDone(s) && !isActive(s))
@@ -65,6 +124,8 @@ export function TodayCockpit({ initialSongs }: { initialSongs: Song[] }) {
 
   return (
     <div className="pt-2">
+      <StreakHeader days={days} />
+
       {active.length > 0 && (
         <Group title="Continuando a jornada">
           <ul className="space-y-3">
@@ -83,21 +144,35 @@ export function TodayCockpit({ initialSongs }: { initialSongs: Song[] }) {
                     </div>
                     <ProgressBar sections={song.sections} />
                   </div>
-                  {nextPart && (
-                    <div className="mt-3 flex items-center justify-between gap-3">
-                      <span className="text-sm text-[color:var(--color-paper)]/75">
-                        próxima: <span className="text-[color:var(--color-paper)]">{nextPart.name}</span>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => advance(song)}
-                        className="rounded-md px-3 py-1.5 text-sm text-[color:var(--color-ink)]"
-                        style={{ background: 'var(--color-moss)' }}
-                      >
-                        avançar
-                      </button>
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    <span className="min-w-0 truncate text-sm text-[color:var(--color-paper)]/75">
+                      {nextPart ? (
+                        <>
+                          próxima: <span className="text-[color:var(--color-paper)]">{nextPart.name}</span>
+                        </>
+                      ) : (
+                        <span className="text-[color:var(--color-ash)]">sem partes pendentes</span>
+                      )}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <LogPractice
+                        entryId={song.entryId}
+                        songId={song.id}
+                        variant="ghost"
+                        onLogged={addDay}
+                      />
+                      {nextPart && (
+                        <button
+                          type="button"
+                          onClick={() => advance(song)}
+                          className="rounded-md px-3 py-1.5 text-sm text-[color:var(--color-ink)]"
+                          style={{ background: 'var(--color-moss)' }}
+                        >
+                          avançar
+                        </button>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </li>
               )
             })}

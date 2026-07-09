@@ -35,7 +35,9 @@ RPC, que valida `auth.uid()`). A `SUPABASE_SERVICE_ROLE_KEY` é usada **só** no
 
 ### 1. Criar o projeto Supabase
 1. [supabase.com](https://supabase.com) → New project.
-2. **SQL Editor** → rode `supabase/migrations/0001_biblioteca.sql` e depois `0002_canonical.sql` (tabelas, RLS, triggers, RPCs e backfill).
+2. **SQL Editor** → rode **todas** as migrações de `supabase/migrations/` **em ordem**
+   (`0001_biblioteca.sql` → `0008_practice_logs.sql`): tabelas, RLS, triggers, RPCs, taxonomia,
+   exercícios, rate-limit de IA e o log de prática.
 3. **Project Settings → API** → copie a `URL` e a `anon public key`.
 
 ### 2. Login com Google

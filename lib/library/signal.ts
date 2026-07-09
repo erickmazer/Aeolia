@@ -21,7 +21,17 @@ export interface UserSignal {
   momento: Momento
   gostoTecnicas: WeightedTag<TechniqueId>[]
   gostoGeneros: WeightedTag<string>[]
+  /** títulos que o usuário realmente pratica agora (sinal mais forte que status). */
+  praticando: string[]
 }
+
+export interface SignalOptions {
+  /** entryIds praticados recentemente (issue #7) — ganham peso extra no gosto. */
+  practicedEntryIds?: Set<string>
+}
+
+// Prática recente é o sinal mais honesto de gosto/foco: pesa acima de "dominada".
+const PRACTICE_BONUS = 2.5
 
 const STATUS_WEIGHT: Record<Song['status'], number> = {
   dominada: 2,
@@ -36,7 +46,8 @@ function topTags<T extends string>(counts: Map<T, number>, n: number): WeightedT
     .slice(0, n)
 }
 
-export function deriveSignal(songs: Song[]): UserSignal {
+export function deriveSignal(songs: Song[], opts: SignalOptions = {}): UserSignal {
+  const practiced = opts.practicedEntryIds ?? new Set<string>()
   const total = songs.length
   const dominadas = songs.filter((s) => s.status === 'dominada').length
   const aprendendo = songs.filter((s) => s.status === 'aprendendo').length
@@ -54,8 +65,11 @@ export function deriveSignal(songs: Song[]): UserSignal {
 
   const tecCounts = new Map<TechniqueId, number>()
   const genCounts = new Map<string, number>()
+  const praticando: string[] = []
   for (const s of songs) {
-    const w = STATUS_WEIGHT[s.status]
+    const isPracticed = s.entryId ? practiced.has(s.entryId) : false
+    if (isPracticed) praticando.push(s.title)
+    const w = STATUS_WEIGHT[s.status] + (isPracticed ? PRACTICE_BONUS : 0)
     for (const t of s.techniques) tecCounts.set(t, (tecCounts.get(t) ?? 0) + w)
     if (s.genre) genCounts.set(s.genre, (genCounts.get(s.genre) ?? 0) + w)
   }
@@ -72,5 +86,6 @@ export function deriveSignal(songs: Song[]): UserSignal {
     momento,
     gostoTecnicas: topTags(tecCounts, 5),
     gostoGeneros: topTags(genCounts, 5),
+    praticando: praticando.slice(0, 8),
   }
 }

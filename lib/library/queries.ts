@@ -4,6 +4,8 @@
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import { createClient } from '@/lib/supabase/server'
 import type { Song, Status, Difficulty, TechniqueId, ContextId, Section, Priority, Stage } from './data'
+import type { PracticeLogRow, PracticeSummary } from './practice'
+import { EMPTY_SUMMARY } from './practice'
 import { SEED_SONGS } from './seed-songs'
 
 // Uma library_entry com a música canônica embutida (join via FK song_id).
@@ -138,6 +140,50 @@ export async function getMySongs(): Promise<Song[] | null> {
     .map(entryToSong)
     .filter((s): s is Song => s !== null)
   return sortSongs(songs)
+}
+
+/**
+ * Resumo do log de prática do usuário (issue #7). Lê as sessões recentes e
+ * agrega dias/músicas; o cálculo temporal (streak, hoje, semana) é feito no
+ * client, que conhece o fuso local. Vazio se não logado / sem Supabase.
+ */
+export async function getPracticeSummary(): Promise<PracticeSummary> {
+  const user = await getCurrentUser()
+  if (!user) return EMPTY_SUMMARY
+
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('practice_logs')
+    .select('id, entry_id, song_id, section_id, minutes, note, logged_at, local_day')
+    .eq('user_id', user.id)
+    .order('logged_at', { ascending: false })
+    .limit(2000)
+
+  const rows = (data ?? []) as PracticeLogRow[]
+  const daySet = new Set<string>()
+  const byEntry: Record<string, { count: number; lastDay: string }> = {}
+  let totalMinutes = 0
+
+  for (const r of rows) {
+    daySet.add(r.local_day)
+    totalMinutes += r.minutes ?? 0
+    if (r.entry_id) {
+      const cur = byEntry[r.entry_id]
+      if (cur) {
+        cur.count++
+        if (r.local_day > cur.lastDay) cur.lastDay = r.local_day
+      } else {
+        byEntry[r.entry_id] = { count: 1, lastDay: r.local_day }
+      }
+    }
+  }
+
+  return {
+    days: [...daySet].sort().reverse(),
+    totalSessions: rows.length,
+    totalMinutes,
+    byEntry,
+  }
 }
 
 /** Níveis de treino de exercícios do usuário logado (exercise_id → 0..3). */

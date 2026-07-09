@@ -101,6 +101,7 @@ PERFIL DO ALUNO (derivado da biblioteca):
 - Momento: ${signal.momento} (${signal.dominadas} dominadas de ${signal.total}).
 - Gosto por técnicas: ${tagList(signal.gostoTecnicas, TECHNIQUE_BY_ID)}.
 - Gosto por gêneros: ${signal.gostoGeneros.map((g) => `${g.id} (${g.score})`).join(', ') || '(nenhum ainda)'}.
+- Praticando de fato agora: ${signal.praticando.join(', ') || '(sem registro recente)'} — priorize a coerência com o que ele REALMENTE toca.
 - Técnicas típicas dos gêneros dele: ${signal.gostoGeneros
     .map((g) => `${g.id} → ${(GENRE_TECHS[g.id] ?? []).map((t) => TECHNIQUE_BY_ID[t]?.name ?? t).join('/') || '—'}`)
     .join('; ') || '—'}.

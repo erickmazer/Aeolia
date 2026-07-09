@@ -1,7 +1,7 @@
 # Biblioteca (Aeolia) — setup (login + banco)
 
 Guia vivo de estudos de música — **multiusuário** e começando com violão. Cada
-pessoa faz login com **Google** e tem sua própria biblioteca;
+pessoa faz login com **Google** (ou e-mail/magic link como fallback) e tem sua própria biblioteca;
 a página pública `/musician/[username]` (hoje `/musician/erick`) mostra a
 biblioteca de **vitrine** só para leitura.
 
@@ -50,6 +50,10 @@ O login é via **Google** (OAuth pelo Supabase). Configure uma vez:
 
 O botão **"Entrar com Google"** aparece no login do app; passa a funcionar assim que o
 provider estiver habilitado. (O callback `/auth/callback` já troca o `code` por sessão.)
+
+**Fallback por e-mail (zero-config):** um "ou entrar por e-mail" (magic link) fica como
+segunda opção — já vem ligado no Supabase, então o login funciona mesmo antes de configurar
+o Google. Requer as mesmas Redirect URLs acima.
 
 ### 3. Variáveis de ambiente
 Copie `.env.example` → `.env.local` (dev) e preencha; configure as mesmas na **Vercel**:

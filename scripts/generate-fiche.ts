@@ -1,16 +1,17 @@
 /**
  * Gerador de ficha por IA (linha de comando)
  * ===========================================
- * Você digita título + artista; o Claude preenche a ficha no mesmo schema da
- * biblioteca. Compartilha o prompt/schema com a rota do site (fiche-ai.ts).
+ * Você digita título + artista; a IA preenche a ficha no mesmo schema da
+ * biblioteca. Compartilha prompt/schema com a rota do site (fiche-ai.ts) e o
+ * cliente de IA (lib/ai/client.ts) — por padrão z.ai/GLM.
  *
  * Rodar:
- *   export ANTHROPIC_API_KEY=sk-ant-...
+ *   export ANTHROPIC_API_KEY=<sua-chave-z.ai>   # ou de outro endpoint compatível
  *   bun run scripts/generate-fiche.ts "Blackbird" "The Beatles"
- *   FICHE_MODEL=claude-haiku-4-5 bun run scripts/generate-fiche.ts "..." "..."
+ *   FICHE_MODEL=glm-4.5-air bun run scripts/generate-fiche.ts "..." "..."
  */
 
-import Anthropic from '@anthropic-ai/sdk'
+import { aiClient, generateStructured } from '../lib/ai/client'
 import { buildFichePrompt, ficheSchema, FICHE_MODEL, type FicheDraft } from '../lib/library/fiche-ai'
 
 async function main() {
@@ -20,19 +21,16 @@ async function main() {
     process.exit(1)
   }
 
-  const client = new Anthropic() // usa ANTHROPIC_API_KEY do ambiente
-
-  const response = await client.messages.create({
+  const fiche = await generateStructured<FicheDraft>({
+    client: aiClient(),
     model: FICHE_MODEL,
-    max_tokens: 1500,
-    output_config: { format: { type: 'json_schema', schema: ficheSchema } },
-    messages: [{ role: 'user', content: buildFichePrompt(title, artist) }],
+    prompt: buildFichePrompt(title, artist),
+    schema: ficheSchema,
+    toolName: 'salvar_ficha',
+    toolDescription: 'Registra a ficha catalográfica da música.',
+    maxTokens: 1500,
   })
 
-  const block = response.content.find((b) => b.type === 'text')
-  if (!block || block.type !== 'text') throw new Error('Sem resposta de texto do modelo')
-
-  const fiche = JSON.parse(block.text) as FicheDraft
   const slug = `${title}-${artist}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
   console.log(JSON.stringify({ slug, status: 'quero-aprender', ...fiche }, null, 2))

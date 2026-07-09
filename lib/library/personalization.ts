@@ -35,7 +35,7 @@ export interface PersonalizationResult {
   suggestions: Suggestion[]
 }
 
-export const PERSONALIZATION_MODEL = process.env.PERSONALIZATION_MODEL ?? 'claude-sonnet-5'
+export const PERSONALIZATION_MODEL = process.env.PERSONALIZATION_MODEL ?? 'glm-4.5-air'
 
 // Schema estruturado. perSong é array (mapa é awkward em json_schema) — a rota
 // converte pra Record por songId.

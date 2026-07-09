@@ -11,12 +11,13 @@ Reaproveita os IDs válidos de técnicas/contextos, então é impossível gerar 
 ficha malformada.
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
+export ANTHROPIC_API_KEY=<sua-chave-z.ai>   # ou de outro endpoint compatível
 bun run scripts/generate-fiche.ts "Blackbird" "The Beatles"
-# FICHE_MODEL=claude-haiku-4-5 → custo mínimo; claude-opus-4-8 → qualidade máxima
+# FICHE_MODEL=glm-4.5-air (default, barato). Troque pelo modelo que quiser testar.
 ```
 
-Usa **Sonnet 5** por padrão (~0,7 centavo por ficha).
+Usa **z.ai/GLM** (`glm-4.5-air`) por padrão — formato da API Anthropic, endpoint mais
+barato. Para voltar à Anthropic: `ANTHROPIC_BASE_URL=https://api.anthropic.com` + um modelo `claude-*`.
 
 ## `seed-showcase.ts` — Semeia a vitrine
 

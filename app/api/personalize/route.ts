@@ -36,6 +36,16 @@ export async function POST() {
     return NextResponse.json({ error: 'ANTHROPIC_API_KEY não configurada no servidor.' }, { status: 503 })
   }
 
+  // Rate-limit (personalização é uma chamada de IA cara). Fail-open se a RPC não existir.
+  const { data: allowed } = await supabase.rpc('rate_limit_ai', {
+    _route: 'personalize',
+    _max: 10,
+    _window_secs: 3600,
+  })
+  if (allowed === false) {
+    return NextResponse.json({ error: 'Muitas atualizações em pouco tempo. Tente daqui a pouco.' }, { status: 429 })
+  }
+
   const songs = (await getMySongs()) ?? []
   const signal = deriveSignal(songs)
 

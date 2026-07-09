@@ -84,6 +84,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'ANTHROPIC_API_KEY não configurada no servidor.' }, { status: 503 })
   }
 
+  // Rate-limit (só no caminho que chama a IA). Fail-open se a RPC não existir.
+  const { data: allowed } = await supabase.rpc('rate_limit_ai', {
+    _route: 'generate',
+    _max: 20,
+    _window_secs: 3600,
+  })
+  if (allowed === false) {
+    return NextResponse.json({ error: 'Muitas gerações em pouco tempo. Tente daqui a pouco.' }, { status: 429 })
+  }
+
   try {
     const client = new Anthropic()
     const response = await client.messages.create({

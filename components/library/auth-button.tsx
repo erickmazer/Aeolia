@@ -10,7 +10,7 @@ const inputClass =
 const borderStyle = { borderColor: 'color-mix(in oklch, var(--color-ash) 25%, transparent)' } as const
 
 /** Login por e-mail (magic link) — nativo do Supabase, sem configurar provider. */
-export function EmailSignIn({ next = '/studio' }: { next?: string }) {
+function EmailSignIn({ next }: { next: string }) {
   const [email, setEmail] = useState('')
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
   const [msg, setMsg] = useState('')
@@ -59,37 +59,50 @@ export function EmailSignIn({ next = '/studio' }: { next?: string }) {
         className="rounded-md px-4 py-2 text-sm text-[color:var(--color-ink)] transition-opacity disabled:opacity-40"
         style={{ background: 'var(--color-patina)' }}
       >
-        {state === 'sending' ? 'enviando…' : 'enviar link de acesso'}
+        {state === 'sending' ? 'enviando…' : 'enviar link'}
       </button>
       {state === 'error' && <span className="w-full text-sm text-[color:oklch(0.65_0.15_25)]">{msg}</span>}
     </form>
   )
 }
 
-/** Login com Google (só funciona depois de configurar o provider no Supabase). */
-export function SignInButton({ next = '/studio', label = 'Entrar com Google' }: { next?: string; label?: string }) {
-  async function signIn() {
+/**
+ * Login: Google (primário) + e-mail/magic link (secundário, discreto).
+ * Google requer o provider habilitado no Supabase (Authentication → Providers).
+ * O e-mail é zero-config (nativo) — funciona como fallback mesmo sem o Google.
+ */
+export function SignInPanel({ next = '/studio' }: { next?: string }) {
+  const [emailOpen, setEmailOpen] = useState(false)
+
+  async function signInGoogle() {
     const supabase = createClient()
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     })
   }
-  return (
-    <button type="button" onClick={signIn} className={linkClass}>
-      {label}
-    </button>
-  )
-}
 
-/** Painel completo: e-mail (padrão) + Google (opcional). */
-export function SignInPanel({ next = '/studio' }: { next?: string }) {
   return (
     <div className="space-y-3">
-      <EmailSignIn next={next} />
-      <p className="text-sm text-[color:var(--color-ash)]">
-        ou <SignInButton next={next} label="entrar com Google" />
-      </p>
+      <button
+        type="button"
+        onClick={signInGoogle}
+        className="rounded-md px-6 py-2.5 text-sm text-[color:var(--color-ink)] transition-opacity hover:opacity-90"
+        style={{ background: 'var(--color-patina)' }}
+      >
+        Entrar com Google
+      </button>
+
+      {emailOpen ? (
+        <EmailSignIn next={next} />
+      ) : (
+        <p className="text-sm text-[color:var(--color-ash)]">
+          ou{' '}
+          <button type="button" onClick={() => setEmailOpen(true)} className={linkClass}>
+            entrar por e-mail
+          </button>
+        </p>
+      )}
     </div>
   )
 }

@@ -8,7 +8,7 @@
  *     IA "chuta" (sinal de campo faltando).
  *
  * Uso:
- *   export ANTHROPIC_API_KEY=sk-ant-...
+ *   export ANTHROPIC_API_KEY=<sua-chave-z.ai>     # ou de outro endpoint compatível
  *   bun run scripts/seed-popular.ts               # DRY-RUN: gera + relatório em JSON, NÃO grava
  *   # para gravar no banco (precisa do Supabase):
  *   export NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
@@ -17,8 +17,9 @@
  */
 
 import { writeFileSync } from 'node:fs'
-import Anthropic from '@anthropic-ai/sdk'
+import type Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
+import { aiClient, generateStructured } from '../lib/ai/client'
 import { buildFichePrompt, ficheSchema, FICHE_MODEL, type FicheDraft } from '../lib/library/fiche-ai'
 import { TECHNIQUE_IDS } from '../lib/library/data'
 
@@ -80,15 +81,15 @@ const POPULAR: Array<[string, string]> = [
 const COMMIT = process.argv.includes('--commit')
 
 async function generateFiche(client: Anthropic, title: string, artist: string): Promise<FicheDraft> {
-  const response = await client.messages.create({
+  return generateStructured<FicheDraft>({
+    client,
     model: FICHE_MODEL,
-    max_tokens: 1500,
-    output_config: { format: { type: 'json_schema', schema: ficheSchema } },
-    messages: [{ role: 'user', content: buildFichePrompt(title, artist) }],
+    prompt: buildFichePrompt(title, artist),
+    schema: ficheSchema,
+    toolName: 'salvar_ficha',
+    toolDescription: 'Registra a ficha catalográfica da música.',
+    maxTokens: 1500,
   })
-  const block = response.content.find((b) => b.type === 'text')
-  if (!block || block.type !== 'text') throw new Error(`sem resposta p/ ${title}`)
-  return JSON.parse(block.text) as FicheDraft
 }
 
 // Pool de concorrência simples.
@@ -107,10 +108,10 @@ async function mapPool<T, R>(items: T[], size: number, fn: (item: T) => Promise<
 
 async function main() {
   if (!process.env.ANTHROPIC_API_KEY) {
-    console.error('Falta ANTHROPIC_API_KEY.')
+    console.error('Falta ANTHROPIC_API_KEY (a chave do endpoint de IA — por padrão z.ai).')
     process.exit(1)
   }
-  const client = new Anthropic()
+  const client = aiClient()
 
   console.log(`Gerando ${POPULAR.length} fichas (modelo ${FICHE_MODEL})…`)
   const results = await mapPool(POPULAR, 4, async ([title, artist]) => {

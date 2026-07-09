@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import { createClient } from '@/lib/supabase/server'
+import { aiClient, generateStructured } from '@/lib/ai/client'
 import { getMySongs } from '@/lib/library/queries'
 import { deriveSignal } from '@/lib/library/signal'
 import {
@@ -50,23 +50,18 @@ export async function POST() {
   const signal = deriveSignal(songs)
 
   try {
-    const client = new Anthropic()
-    const response = await client.messages.create({
-      model: PERSONALIZATION_MODEL,
-      max_tokens: 2000,
-      output_config: { format: { type: 'json_schema', schema: personalizationSchema } },
-      messages: [{ role: 'user', content: buildPersonalizationPrompt(signal, songs) }],
-    })
-
-    const block = response.content.find((b) => b.type === 'text')
-    if (!block || block.type !== 'text') {
-      return NextResponse.json({ error: 'O modelo não retornou a personalização.' }, { status: 502 })
-    }
-
-    const raw = JSON.parse(block.text) as {
+    const raw = await generateStructured<{
       perSong: SongFit[]
       suggestions: PersonalizationResult['suggestions']
-    }
+    }>({
+      client: aiClient(),
+      model: PERSONALIZATION_MODEL,
+      prompt: buildPersonalizationPrompt(signal, songs),
+      schema: personalizationSchema,
+      toolName: 'personalizar',
+      toolDescription: 'Devolve o fit por música e as sugestões de próximas.',
+      maxTokens: 2000,
+    })
 
     const perSong: Record<string, SongFit> = {}
     for (const fit of raw.perSong ?? []) perSong[fit.songId] = fit

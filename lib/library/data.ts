@@ -37,13 +37,11 @@ export const DIFFICULTY_LABELS: Record<Difficulty, string> = {
 export type TechniqueId =
   | 'fingerstyle'
   | 'travis-picking'
-  | 'independencia-mao-direita'
+  | 'baixos-alternados'
+  | 'independencia'
   | 'bossa-nova'
-  | 'harmonicos'
-  | 'percussao'
-  | 'voicings'
-  | 'improvisacao'
-  | 'cantar-tocando'
+  | 'harmonia'
+  | 'dinamica'
 
 export interface Technique {
   id: TechniqueId
@@ -54,14 +52,43 @@ export interface Technique {
 export const TECHNIQUES: Technique[] = [
   { id: 'fingerstyle', name: 'Fingerstyle', blurb: 'Dedilhar melodia, baixo e harmonia ao mesmo tempo.' },
   { id: 'travis-picking', name: 'Travis Picking', blurb: 'Baixo alternado com o polegar sob a melodia.' },
-  { id: 'independencia-mao-direita', name: 'Independência da mão direita', blurb: 'Cada dedo com sua própria voz e ritmo.' },
+  { id: 'baixos-alternados', name: 'Baixos alternados', blurb: 'Polegar alternando tônica e quinta — base de folk/country.' },
+  { id: 'independencia', name: 'Independência', blurb: 'Cada mão (e dedo) com sua própria voz e ritmo.' },
   { id: 'bossa-nova', name: 'Bossa Nova', blurb: 'A batida sincopada e o balanço da mão direita.' },
-  { id: 'harmonicos', name: 'Harmônicos', blurb: 'Naturais e artificiais — o brilho de sino.' },
-  { id: 'percussao', name: 'Percussão no violão', blurb: 'Usar o corpo do instrumento como um tambor.' },
-  { id: 'voicings', name: 'Voicings e acordes sofisticados', blurb: 'Tensões, inversões e cores fora do básico.' },
-  { id: 'improvisacao', name: 'Improvisação', blurb: 'Frasear livre sobre a harmonia.' },
-  { id: 'cantar-tocando', name: 'Cantar enquanto toca', blurb: 'Manter a voz firme com a mão em outro ritmo.' },
+  { id: 'harmonia', name: 'Harmonia', blurb: 'Campos, tensões, inversões — entender por que funciona.' },
+  { id: 'dinamica', name: 'Dinâmica', blurb: 'Controle de volume e intenção — do pianíssimo ao forte.' },
 ]
+
+// ── Skills = as 7 técnicas + fundamentos (para exercícios e XP) ──────────────
+export type SkillId = TechniqueId | 'troca-acordes' | 'ritmo'
+export interface Skill {
+  id: SkillId
+  name: string
+  tipo: 'tecnica' | 'fundamento'
+}
+export const SKILLS: Skill[] = [
+  ...TECHNIQUES.map((t) => ({ id: t.id as SkillId, name: t.name, tipo: 'tecnica' as const })),
+  { id: 'troca-acordes', name: 'Troca de acordes', tipo: 'fundamento' },
+  { id: 'ritmo', name: 'Ritmo', tipo: 'fundamento' },
+]
+
+// ── Técnicas típicas por gênero (item 7) — semente pra recomendação ─────────
+export const GENRE_TECHS: Record<string, TechniqueId[]> = {
+  MPB: ['harmonia', 'bossa-nova', 'dinamica'],
+  'Bossa Nova': ['bossa-nova', 'harmonia', 'independencia'],
+  Folk: ['fingerstyle', 'travis-picking', 'baixos-alternados'],
+  Indie: ['fingerstyle', 'dinamica', 'harmonia'],
+  Instrumental: ['fingerstyle', 'independencia', 'travis-picking'],
+  Blues: ['baixos-alternados', 'dinamica'],
+  Sertanejo: ['baixos-alternados', 'dinamica'],
+  Samba: ['harmonia', 'dinamica'],
+  Jazz: ['harmonia', 'independencia'],
+  'Clássico': ['fingerstyle', 'independencia', 'dinamica'],
+  Country: ['travis-picking', 'baixos-alternados'],
+  Infantil: ['dinamica', 'harmonia'],
+  Rock: ['dinamica'],
+  Pop: ['harmonia', 'dinamica'],
+}
 
 // ── Contextos ─────────────────────────────────────────────────────────────
 
@@ -92,6 +119,28 @@ export const CONTEXTS: Context[] = [
   { id: 'bosses', name: 'Grandes desafios ("Bosses")', blurb: 'As que exigem meses. O objetivo do horizonte.' },
 ]
 
+// ── Gênero (canônico, single) — item 1: eixo separado dos contextos ──────────
+export const GENRES = [
+  'MPB', 'Bossa Nova', 'Folk', 'Indie', 'Instrumental', 'Rock', 'Pop',
+  'Blues', 'Sertanejo', 'Samba', 'Jazz', 'Clássico', 'Country', 'Infantil',
+] as const
+
+// ── Prioridade de aprendizado (privado) — NÃO confundir com status ──────────
+export type Priority = 'agora' | 'proxima' | 'algumdia'
+export const PRIORITIES: { id: Priority; label: string; color: string }[] = [
+  { id: 'agora', label: 'Agora', color: 'var(--color-patina)' },
+  { id: 'proxima', label: 'Próxima', color: 'var(--color-moss)' },
+  { id: 'algumdia', label: 'Algum dia', color: 'var(--color-ash)' },
+]
+
+// ── Stage: ciclo de vida da música na biblioteca (privado) ──────────────────
+export type Stage = 'backlog' | 'biblioteca' | 'arquivada'
+export const STAGES: { id: Stage; label: string }[] = [
+  { id: 'backlog', label: 'Caixa de entrada' },
+  { id: 'biblioteca', label: 'Biblioteca' },
+  { id: 'arquivada', label: 'Arquivada' },
+]
+
 // ── Música (ficha) ──────────────────────────────────────────────────────────
 
 export interface Link {
@@ -120,6 +169,14 @@ export interface Song {
   personalNote?: string
   /** partes/seções da música e o progresso do usuário em cada uma. */
   sections?: Section[]
+  /** gênero canônico (público). Ex.: MPB, Folk, Rock. */
+  genre?: string
+  /** coleções pessoais (labels livres do usuário). Ex.: Aurora, Favoritas. */
+  collections?: string[]
+  /** prioridade de aprendizado (privado). */
+  priority?: Priority | null
+  /** ciclo de vida na biblioteca (privado). */
+  stage?: Stage
 }
 
 // ── Progresso por partes (issue #5) ──────────────────────────────────────────
@@ -129,6 +186,8 @@ export interface Section {
   id: string
   name: string
   status: SectionStatus
+  /** progressão de acordes da parte (ex.: "C G Am F"). Conhecimento livre. */
+  chords?: string
 }
 
 export const SECTION_STATUS_LABEL: Record<SectionStatus, string> = {
@@ -156,6 +215,9 @@ export const CONTEXT_BY_ID: Record<ContextId, Context> = Object.fromEntries(
 export const STATUS_BY_ID: Record<Status, StatusMeta> = Object.fromEntries(
   STATUSES.map((s) => [s.id, s]),
 ) as Record<Status, StatusMeta>
+
+export const PRIORITY_BY_ID: Record<Priority, { id: Priority; label: string; color: string }> =
+  Object.fromEntries(PRIORITIES.map((p) => [p.id, p])) as Record<Priority, { id: Priority; label: string; color: string }>
 
 export const TECHNIQUE_IDS = TECHNIQUES.map((t) => t.id)
 export const CONTEXT_IDS = CONTEXTS.map((c) => c.id)

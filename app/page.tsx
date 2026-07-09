@@ -1,6 +1,10 @@
-import { redirect } from "next/navigation";
+import { redirect } from 'next/navigation'
+import { getCurrentUser } from '@/lib/library/queries'
+import { Landing } from '@/components/landing'
 
-// Projeto único neste repo: a página pública do músico vive em /musician/[username].
-export default function Home() {
-  redirect("/musician/erick");
+// Logado → o app pessoal (casca mobile). Anônimo → landing.
+export default async function Home() {
+  const user = await getCurrentUser()
+  if (user) redirect('/today')
+  return <Landing />
 }

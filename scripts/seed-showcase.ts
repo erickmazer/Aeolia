@@ -27,6 +27,24 @@ if (!url || !serviceKey || !userId) {
 
 const db = createClient(url, serviceKey, { auth: { persistSession: false } })
 
+// Deriva gênero/coleções dos contexts legados da semente (item 1).
+function deriveGenre(contexts: string[]): string | null {
+  if (contexts.includes('mpb')) return 'MPB'
+  if (contexts.includes('folk-indie')) return 'Folk'
+  if (contexts.includes('pop-rock')) return 'Rock'
+  return null
+}
+const COLLECTION_MAP: Record<string, string> = {
+  'para-filha': 'Aurora',
+  relaxar: 'Relaxar',
+  'cantar-junto': 'Cantar junto',
+  'estudar-tecnica': 'Estudar técnica',
+  bosses: 'Desafios',
+}
+function deriveCollections(contexts: string[]): string[] {
+  return contexts.map((c) => COLLECTION_MAP[c]).filter(Boolean)
+}
+
 async function main() {
   // Marca a conta como vitrine pública.
   const { error: profErr } = await db.from('profiles').update({ is_showcase: true }).eq('id', userId)
@@ -43,7 +61,7 @@ async function main() {
           artist: s.artist,
           difficulty: s.difficulty,
           techniques: s.techniques,
-          contexts: s.contexts,
+          genre: deriveGenre(s.contexts),
           best_version_label: s.bestVersion?.label ?? null,
           best_version_url: s.bestVersion?.url ?? null,
           best_lesson_label: s.bestLesson?.label ?? null,
@@ -63,7 +81,7 @@ async function main() {
     const { error } = await db
       .from('library_entries')
       .upsert(
-        { user_id: userId, song_id: slugToId[s.id], status: s.status },
+        { user_id: userId, song_id: slugToId[s.id], status: s.status, collections: deriveCollections(s.contexts) },
         { onConflict: 'user_id,song_id' },
       )
     if (error) throw error

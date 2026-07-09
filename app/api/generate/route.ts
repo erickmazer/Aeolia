@@ -14,6 +14,7 @@ interface CanonicalRow {
   difficulty: number
   techniques: string[] | null
   contexts: string[] | null
+  genre: string | null
   best_version_label: string | null
   best_version_url: string | null
   best_lesson_label: string | null
@@ -31,6 +32,7 @@ function canonicalToSong(c: CanonicalRow): Song {
     status: 'quero-aprender',
     techniques: (c.techniques ?? []) as TechniqueId[],
     contexts: (c.contexts ?? []) as ContextId[],
+    genre: c.genre ?? undefined,
     prerequisites: [],
     nextSongs: [],
     bestVersion: c.best_version_url

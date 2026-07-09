@@ -4,10 +4,9 @@ import { useMemo, useState } from 'react'
 import {
   STATUSES,
   TECHNIQUES,
-  CONTEXTS,
+  GENRES,
   DIFFICULTY_LABELS,
   TECHNIQUE_BY_ID,
-  CONTEXT_BY_ID,
   STATUS_BY_ID,
   countByStatus,
   songsForTechnique,
@@ -15,7 +14,6 @@ import {
   type Song,
   type Status,
   type TechniqueId,
-  type ContextId,
   type Section,
 } from '@/lib/library/data'
 import { RELATIVE_DIFFICULTY_LABEL, type SongFit } from '@/lib/library/personalization'
@@ -233,16 +231,26 @@ function SongCard({
             </div>
           </FicheRow>
 
-          <FicheRow label="Contextos">
-            <div className="flex flex-wrap gap-2">
-              {song.contexts.map((c, i) => (
-                <span key={c} className="text-sm text-[color:var(--color-paper)]/80" title={CONTEXT_BY_ID[c]?.blurb}>
-                  {CONTEXT_BY_ID[c]?.name ?? c}
-                  {i !== song.contexts.length - 1 && <span className="ml-2 text-[color:var(--color-ash)]">·</span>}
-                </span>
-              ))}
-            </div>
-          </FicheRow>
+          {song.genre && (
+            <FicheRow label="Gênero">
+              <span className="text-sm text-[color:var(--color-paper)]/80">{song.genre}</span>
+            </FicheRow>
+          )}
+          {song.collections && song.collections.length > 0 && (
+            <FicheRow label="Coleções">
+              <div className="flex flex-wrap gap-2">
+                {song.collections.map((c) => (
+                  <span
+                    key={c}
+                    className="rounded-full px-2.5 py-0.5 text-sm text-[color:var(--color-paper)]/85"
+                    style={{ background: 'color-mix(in oklch, var(--color-paper) 6%, transparent)' }}
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </FicheRow>
+          )}
 
           <FicheRow label="Pré-requisitos">
             <SongLinkList ids={song.prerequisites} empty="Nenhum — pode começar por aqui." byId={byId} />
@@ -313,7 +321,7 @@ export function Library({
 }) {
   const [statusFilter, setStatusFilter] = useState<Status | null>(null)
   const [techniqueFilter, setTechniqueFilter] = useState<TechniqueId | null>(null)
-  const [contextFilter, setContextFilter] = useState<ContextId | null>(null)
+  const [genreFilter, setGenreFilter] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [expanded, setExpanded] = useState<string | null>(null)
 
@@ -325,14 +333,14 @@ export function Library({
       .filter((s) => {
         if (statusFilter && s.status !== statusFilter) return false
         if (techniqueFilter && !s.techniques.includes(techniqueFilter)) return false
-        if (contextFilter && !s.contexts.includes(contextFilter)) return false
+        if (genreFilter && s.genre !== genreFilter) return false
         if (q && !`${s.title} ${s.artist}`.toLowerCase().includes(q)) return false
         return true
       })
       .sort((a, b) => a.difficulty - b.difficulty || a.title.localeCompare(b.title))
-  }, [songs, statusFilter, techniqueFilter, contextFilter, query])
+  }, [songs, statusFilter, techniqueFilter, genreFilter, query])
 
-  const anyFilter = statusFilter || techniqueFilter || contextFilter || query
+  const anyFilter = statusFilter || techniqueFilter || genreFilter || query
   const total = songs.length
 
   function pickTechnique(id: TechniqueId) {
@@ -437,15 +445,11 @@ export function Library({
         </div>
 
         <div className="mb-3">
-          <div className="mb-2 text-xs uppercase tracking-widest text-[color:var(--color-ash)]">Contexto</div>
+          <div className="mb-2 text-xs uppercase tracking-widest text-[color:var(--color-ash)]">Gênero</div>
           <div className="flex flex-wrap gap-2">
-            {CONTEXTS.map((c) => (
-              <Chip
-                key={c.id}
-                active={contextFilter === c.id}
-                onClick={() => setContextFilter((cur) => (cur === c.id ? null : c.id))}
-              >
-                {c.name}
+            {GENRES.map((g) => (
+              <Chip key={g} active={genreFilter === g} onClick={() => setGenreFilter((cur) => (cur === g ? null : g))}>
+                {g}
               </Chip>
             ))}
           </div>
@@ -473,7 +477,7 @@ export function Library({
               onClick={() => {
                 setStatusFilter(null)
                 setTechniqueFilter(null)
-                setContextFilter(null)
+                setGenreFilter(null)
                 setQuery('')
               }}
               className="text-[color:var(--color-patina)] underline decoration-[color:var(--color-ash)] decoration-1 underline-offset-4 transition-colors hover:text-[color:var(--color-paper)]"

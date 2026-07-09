@@ -2,7 +2,7 @@
 // Puro (sem importar o SDK da Anthropic), então serve tanto pra rota de
 // servidor quanto pro script de linha de comando.
 
-import { TECHNIQUES, CONTEXTS, DIFFICULTY_LABELS, TECHNIQUE_IDS, CONTEXT_IDS } from './data'
+import { TECHNIQUES, GENRES, DIFFICULTY_LABELS, TECHNIQUE_IDS } from './data'
 
 /** A ficha que a IA preenche — só a parte "rica"; status/id/relações são do usuário. */
 export interface FicheDraft {
@@ -10,7 +10,7 @@ export interface FicheDraft {
   artist: string
   difficulty: 1 | 2 | 3 | 4 | 5
   techniques: string[]
-  contexts: string[]
+  genre: string
   bestVersion?: { label: string; url: string }
   bestLesson?: { label: string; url: string }
   notes: string
@@ -27,7 +27,7 @@ export const ficheSchema = {
     artist: { type: 'string' },
     difficulty: { type: 'integer', enum: [1, 2, 3, 4, 5] },
     techniques: { type: 'array', items: { type: 'string', enum: TECHNIQUE_IDS } },
-    contexts: { type: 'array', items: { type: 'string', enum: CONTEXT_IDS } },
+    genre: { type: 'string', enum: GENRES },
     bestVersion: {
       type: 'object',
       additionalProperties: false,
@@ -42,11 +42,11 @@ export const ficheSchema = {
     },
     notes: { type: 'string' },
   },
-  required: ['title', 'artist', 'difficulty', 'techniques', 'contexts', 'notes'],
+  required: ['title', 'artist', 'difficulty', 'techniques', 'genre', 'notes'],
 }
 
 const techniqueGuide = TECHNIQUES.map((t) => `- ${t.id}: ${t.name} — ${t.blurb}`).join('\n')
-const contextGuide = CONTEXTS.map((c) => `- ${c.id}: ${c.name} — ${c.blurb}`).join('\n')
+const genreGuide = GENRES.join(', ')
 const difficultyGuide = Object.entries(DIFFICULTY_LABELS)
   .map(([n, label]) => `${n} = ${label}`)
   .join(', ')
@@ -58,14 +58,14 @@ Preencha a ficha da música "${title}" — ${artist}.
 Técnicas disponíveis (use os ids):
 ${techniqueGuide}
 
-Contextos disponíveis (use os ids):
-${contextGuide}
+Gêneros disponíveis (escolha UM, o mais central):
+${genreGuide}
 
 Dificuldade: ${difficultyGuide} (do ponto de vista de um violonista intermediário
 tocando dedilhado/fingerstyle e cantando junto).
 
 Regras:
-- Escolha só as técnicas e contextos REALMENTE centrais para esta música.
+- Escolha só as técnicas REALMENTE centrais para esta música, e UM gênero.
 - "notes" (2-3 frases, PT-BR): o que essa música ensina e onde mora a dificuldade.
   Escreva como um professor experiente, não genérico.
 - Em bestVersion/bestLesson, se não souber um link específico e confiável, use uma

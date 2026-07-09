@@ -73,5 +73,5 @@ Regras:
   links de vídeos específicos.`
 }
 
-/** Modelo padrão do gerador (troque via FICHE_MODEL). */
-export const FICHE_MODEL = process.env.FICHE_MODEL ?? 'claude-sonnet-5'
+/** Modelo padrão do gerador (troque via FICHE_MODEL). GLM barato por padrão. */
+export const FICHE_MODEL = process.env.FICHE_MODEL ?? 'glm-4.5-air'

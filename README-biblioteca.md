@@ -5,7 +5,8 @@ pessoa faz login com **Google** (ou e-mail/magic link como fallback) e tem sua p
 a página pública `/musician/[username]` (hoje `/musician/erick`) mostra a
 biblioteca de **vitrine** só para leitura.
 
-- **Stack:** Next.js 16 + Supabase (Postgres + Auth + RLS) + Claude (Sonnet 5) para gerar fichas.
+- **Stack:** Next.js 16 + Supabase (Postgres + Auth + RLS) + IA para gerar fichas
+  (formato da API Anthropic; por enquanto apontando para o endpoint compatível da **z.ai/GLM**, mais barato).
 - **Rotas:** `/musician/[username]` (página pública do músico) · `/studio` (sua biblioteca, autenticada).
 - **Enquanto não configurado:** `/musician/erick` mostra a semente curada (13 músicas) como fallback — nada quebra.
 
@@ -58,7 +59,12 @@ o Google. Requer as mesmas Redirect URLs acima.
 ### 3. Variáveis de ambiente
 Copie `.env.example` → `.env.local` (dev) e preencha; configure as mesmas na **Vercel**:
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `ANTHROPIC_API_KEY` (e opcionalmente `FICHE_MODEL`)
+- `ANTHROPIC_API_KEY` — a chave de IA (por padrão a da **z.ai**, em
+  [manage-apikey](https://z.ai/manage-apikey/apikey-list)). O código usa o SDK da Anthropic
+  com o `baseURL` trocado, então o nome da variável continua `ANTHROPIC_*`.
+- Opcionais: `ANTHROPIC_BASE_URL` (default `https://api.z.ai/api/anthropic`) e
+  `FICHE_MODEL`/`PERSONALIZATION_MODEL` (default `glm-4.5-air`). Para voltar à Anthropic:
+  `ANTHROPIC_BASE_URL=https://api.anthropic.com` + um modelo `claude-*`.
 
 ### 4. Marcar sua conta como vitrine + semear
 1. Rode o app, acesse `/studio`, faça login com Google uma vez (cria seu profile).
@@ -83,6 +89,6 @@ Copie `.env.example` → `.env.local` (dev) e preencha; configure as mesmas na *
 
 Independente do site, dá pra gerar uma ficha no terminal:
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
+export ANTHROPIC_API_KEY=<sua-chave-z.ai>   # ou de outro endpoint compatível
 bun run scripts/generate-fiche.ts "Blackbird" "The Beatles"
 ```

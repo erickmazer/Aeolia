@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import { createClient } from '@/lib/supabase/server'
-import { buildFichePrompt, ficheSchema, FICHE_MODEL } from '@/lib/library/fiche-ai'
+import { aiClient, generateStructured } from '@/lib/ai/client'
+import { buildFichePrompt, ficheSchema, FICHE_MODEL, type FicheDraft } from '@/lib/library/fiche-ai'
 import type { Song, Difficulty, TechniqueId, ContextId } from '@/lib/library/data'
 
 export const runtime = 'nodejs'
@@ -95,19 +95,16 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const client = new Anthropic()
-    const response = await client.messages.create({
+    const draft = await generateStructured<FicheDraft>({
+      client: aiClient(),
       model: FICHE_MODEL,
-      max_tokens: 1500,
-      output_config: { format: { type: 'json_schema', schema: ficheSchema } },
-      messages: [{ role: 'user', content: buildFichePrompt(title, artist) }],
+      prompt: buildFichePrompt(title, artist),
+      schema: ficheSchema,
+      toolName: 'salvar_ficha',
+      toolDescription: 'Registra a ficha catalográfica da música.',
+      maxTokens: 1500,
     })
-
-    const block = response.content.find((b) => b.type === 'text')
-    if (!block || block.type !== 'text') {
-      return NextResponse.json({ error: 'O modelo não retornou uma ficha.' }, { status: 502 })
-    }
-    return NextResponse.json({ existing: false, draft: JSON.parse(block.text) })
+    return NextResponse.json({ existing: false, draft })
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Falha ao gerar a ficha.'
     return NextResponse.json({ error: message }, { status: 502 })

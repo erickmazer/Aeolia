@@ -1,7 +1,7 @@
 # Biblioteca (Aeolia) — setup (login + banco)
 
 Guia vivo de estudos de música — **multiusuário** e começando com violão. Cada
-pessoa faz login (por e-mail/magic link, ou Google) e tem sua própria biblioteca;
+pessoa faz login com **Google** e tem sua própria biblioteca;
 a página pública `/musician/[username]` (hoje `/musician/erick`) mostra a
 biblioteca de **vitrine** só para leitura.
 
@@ -38,20 +38,18 @@ RPC, que valida `auth.uid()`). A `SUPABASE_SERVICE_ROLE_KEY` é usada **só** no
 2. **SQL Editor** → rode `supabase/migrations/0001_biblioteca.sql` e depois `0002_canonical.sql` (tabelas, RLS, triggers, RPCs e backfill).
 3. **Project Settings → API** → copie a `URL` e a `anon public key`.
 
-### 2. Login (e-mail por padrão — zero config)
-O login por **e-mail (magic link)** já vem ligado no Supabase — não precisa
-configurar provider nenhum. Só ajuste as URLs de redirecionamento:
+### 2. Login com Google
+O login é via **Google** (OAuth pelo Supabase). Configure uma vez:
 
-1. **Authentication → URL Configuration → Redirect URLs**: adicione
-   `https://erickmazer.com/auth/callback` e `http://localhost:7777/auth/callback`.
-2. (Se o link do e-mail não logar) **Authentication → Email Templates → Magic Link**:
-   aponte o link para `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email`.
-   O callback já trata esse formato.
+1. **Google Cloud** → crie um OAuth 2.0 Client ID (redirect URI
+   `https://<seu-projeto>.supabase.co/auth/v1/callback`).
+2. **Supabase → Authentication → Providers → Google**: cole Client ID/Secret e habilite.
+3. **Supabase → Authentication → URL Configuration → Redirect URLs**: adicione
+   `https://erickmazer.com/auth/callback`, `http://localhost:7777/auth/callback` e o
+   domínio de preview da Vercel (`https://<preview>.vercel.app/auth/callback`).
 
-**Google (opcional, pra depois):** crie um OAuth 2.0 Client ID no Google Cloud
-(redirect URI `https://<seu-projeto>.supabase.co/auth/v1/callback`), cole Client
-ID/Secret em **Authentication → Providers → Google**. O botão "entrar com Google"
-já está na tela; passa a funcionar quando o provider estiver ligado.
+O botão **"Entrar com Google"** aparece no login do app; passa a funcionar assim que o
+provider estiver habilitado. (O callback `/auth/callback` já troca o `code` por sessão.)
 
 ### 3. Variáveis de ambiente
 Copie `.env.example` → `.env.local` (dev) e preencha; configure as mesmas na **Vercel**:

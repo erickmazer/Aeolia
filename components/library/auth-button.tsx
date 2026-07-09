@@ -1,73 +1,15 @@
 'use client'
 
-import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 const linkClass =
   'text-sm text-[color:var(--color-patina)] underline decoration-[color:var(--color-ash)] decoration-1 underline-offset-4 transition-colors hover:text-[color:var(--color-paper)]'
-const inputClass =
-  'rounded-md border bg-transparent px-3 py-2 text-sm text-[color:var(--color-paper)] placeholder:text-[color:var(--color-ash)]'
-const borderStyle = { borderColor: 'color-mix(in oklch, var(--color-ash) 25%, transparent)' } as const
 
-/** Login por e-mail (magic link) — nativo do Supabase, sem configurar provider. */
-export function EmailSignIn({ next = '/studio' }: { next?: string }) {
-  const [email, setEmail] = useState('')
-  const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle')
-  const [msg, setMsg] = useState('')
-
-  async function send(e: React.FormEvent) {
-    e.preventDefault()
-    if (!email.trim()) return
-    setState('sending')
-    setMsg('')
-    const supabase = createClient()
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
-    })
-    if (error) {
-      setState('error')
-      setMsg(error.message)
-    } else {
-      setState('sent')
-    }
-  }
-
-  if (state === 'sent') {
-    return (
-      <p className="text-sm leading-relaxed text-[color:var(--color-paper)]/85">
-        Enviei um link de acesso para <span className="text-[color:var(--color-patina)]">{email}</span>. Abra o
-        e-mail (no mesmo navegador) para entrar.
-      </p>
-    )
-  }
-
-  return (
-    <form onSubmit={send} className="flex flex-wrap items-center gap-2">
-      <input
-        type="email"
-        required
-        className={inputClass}
-        style={borderStyle}
-        placeholder="seu@email.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <button
-        type="submit"
-        disabled={state === 'sending'}
-        className="rounded-md px-4 py-2 text-sm text-[color:var(--color-ink)] transition-opacity disabled:opacity-40"
-        style={{ background: 'var(--color-patina)' }}
-      >
-        {state === 'sending' ? 'enviando…' : 'enviar link de acesso'}
-      </button>
-      {state === 'error' && <span className="w-full text-sm text-[color:oklch(0.65_0.15_25)]">{msg}</span>}
-    </form>
-  )
-}
-
-/** Login com Google (só funciona depois de configurar o provider no Supabase). */
-export function SignInButton({ next = '/studio', label = 'Entrar com Google' }: { next?: string; label?: string }) {
+/**
+ * Login com Google (OAuth via Supabase).
+ * Requer o provider Google habilitado no Supabase (Authentication → Providers).
+ */
+export function SignInPanel({ next = '/studio' }: { next?: string }) {
   async function signIn() {
     const supabase = createClient()
     await supabase.auth.signInWithOAuth({
@@ -75,22 +17,20 @@ export function SignInButton({ next = '/studio', label = 'Entrar com Google' }: 
       options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
     })
   }
-  return (
-    <button type="button" onClick={signIn} className={linkClass}>
-      {label}
-    </button>
-  )
-}
 
-/** Painel completo: e-mail (padrão) + Google (opcional). */
-export function SignInPanel({ next = '/studio' }: { next?: string }) {
   return (
-    <div className="space-y-3">
-      <EmailSignIn next={next} />
-      <p className="text-sm text-[color:var(--color-ash)]">
-        ou <SignInButton next={next} label="entrar com Google" />
-      </p>
-    </div>
+    <button
+      type="button"
+      onClick={signIn}
+      className="inline-flex items-center gap-2 rounded-md px-6 py-2.5 text-sm text-[color:var(--color-ink)] transition-opacity hover:opacity-90"
+      style={{ background: 'var(--color-patina)' }}
+    >
+      {/* logotipo G simplificado (SVG inline) */}
+      <svg width="16" height="16" viewBox="0 0 48 48" aria-hidden>
+        <path fill="#1c1a17" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.9 2.4 30.3 0 24 0 14.6 0 6.4 5.4 2.5 13.2l7.9 6.1C12.3 13.2 17.6 9.5 24 9.5z" opacity=".0"/>
+      </svg>
+      Entrar com Google
+    </button>
   )
 }
 

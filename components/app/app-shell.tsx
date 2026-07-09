@@ -5,10 +5,39 @@ import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 const TABS = [
-  { href: '/today', label: 'Today' },
-  { href: '/songs', label: 'Songs' },
-  { href: '/exercises', label: 'Exercises' },
-]
+  { href: '/today', label: 'Today', id: 'today' },
+  { href: '/songs', label: 'Songs', id: 'songs' },
+  { href: '/exercises', label: 'Exercises', id: 'exercises' },
+] as const
+
+// Ícones da bottom bar — linha fina, herdam a cor do link (currentColor).
+function NavIcon({ id }: { id: (typeof TABS)[number]['id'] }) {
+  if (id === 'today') {
+    // sol / "hoje"
+    return (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" />
+      </svg>
+    )
+  }
+  if (id === 'songs') {
+    // nota musical / repertório
+    return (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M9 18V6l10-2v10" />
+        <circle cx="6.5" cy="18" r="2.5" fill="currentColor" stroke="none" />
+        <circle cx="16.5" cy="16" r="2.5" fill="currentColor" stroke="none" />
+      </svg>
+    )
+  }
+  // barras / exercícios (drills)
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M6 20V10M12 20V4M18 20v-7" />
+    </svg>
+  )
+}
 
 export function AppShell({ userLabel, children }: { userLabel: string; children: React.ReactNode }) {
   const pathname = usePathname()
@@ -66,10 +95,7 @@ export function AppShell({ userLabel, children }: { userLabel: string; children:
               className="flex flex-1 flex-col items-center gap-1 text-xs tracking-wide transition-colors"
               style={{ color: active ? 'var(--color-patina)' : 'var(--color-ash)' }}
             >
-              <span
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ background: active ? 'var(--color-patina)' : 'transparent' }}
-              />
+              <NavIcon id={t.id} />
               {t.label}
             </Link>
           )

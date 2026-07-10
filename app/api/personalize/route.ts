@@ -2,8 +2,9 @@ import { NextResponse } from 'next/server'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import { createClient } from '@/lib/supabase/server'
 import { aiClient, generateStructured } from '@/lib/ai/client'
-import { getMySongs } from '@/lib/library/queries'
+import { getMySongs, getPracticeSummary } from '@/lib/library/queries'
 import { deriveSignal } from '@/lib/library/signal'
+import { localDay } from '@/lib/library/practice'
 import {
   buildPersonalizationPrompt,
   personalizationSchema,
@@ -47,7 +48,17 @@ export async function POST() {
   }
 
   const songs = (await getMySongs()) ?? []
-  const signal = deriveSignal(songs)
+
+  // Sinal de prática recente (issue #7): entradas praticadas nos últimos 14 dias
+  // pesam mais no gosto do que o status marcado.
+  const summary = await getPracticeSummary()
+  const cutoff = localDay(new Date(Date.now() - 14 * 86_400_000))
+  const practicedEntryIds = new Set(
+    Object.entries(summary.byEntry)
+      .filter(([, v]) => v.lastDay >= cutoff)
+      .map(([entryId]) => entryId),
+  )
+  const signal = deriveSignal(songs, { practicedEntryIds })
 
   try {
     const raw = await generateStructured<{

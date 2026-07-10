@@ -3,7 +3,9 @@
 import { useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { sectionProgress, type Section, type SectionStatus, type Song } from '@/lib/library/data'
+import { practicedToday, type PracticeSummary } from '@/lib/library/practice'
 import { ChordRow } from './chord-diagram'
+import { LogPractice } from './log-practice'
 
 // Product surface em inglês (produto pensado global).
 const EN_STATUS: Record<SectionStatus, string> = {
@@ -28,9 +30,21 @@ function isDone(song: Song): boolean {
   return song.status === 'dominada'
 }
 
-export function PracticeMode({ initialSongs }: { initialSongs: Song[] }) {
+export function PracticeMode({
+  initialSongs,
+  summary,
+}: {
+  initialSongs: Song[]
+  summary?: PracticeSummary
+}) {
   const [songs, setSongs] = useState<Song[]>(initialSongs)
   const [index, setIndex] = useState(0)
+  const [days, setDays] = useState<string[]>(summary?.days ?? [])
+  const loggedToday = practicedToday(days)
+
+  function addDay(day: string) {
+    setDays((cur) => (cur.includes(day) ? cur : [day, ...cur]))
+  }
 
   // Fila: o que ainda não está dominado, aprendendo primeiro, por dificuldade.
   const queue = useMemo(
@@ -132,7 +146,17 @@ export function PracticeMode({ initialSongs }: { initialSongs: Song[] }) {
         </ul>
       )}
 
-      <p className="mt-4 text-center text-xs text-[color:var(--color-ash)]">toque numa parte para avançar o estado</p>
+      {sections.length > 0 && (
+        <p className="mt-4 text-center text-xs text-[color:var(--color-ash)]">toque numa parte para avançar o estado</p>
+      )}
+
+      {/* Registrar prática desta música (issue #7) */}
+      <div className="mt-6 flex flex-col items-center gap-2">
+        <LogPractice key={song.entryId ?? song.id} entryId={song.entryId} songId={song.id} onLogged={addDay} />
+        <span className="text-xs text-[color:var(--color-ash)]">
+          {loggedToday ? 'você já praticou hoje — bom trabalho ✓' : 'toque ao terminar de praticar'}
+        </span>
+      </div>
 
       {/* Navegação da fila */}
       <div className="mt-8 flex items-center justify-between gap-3">

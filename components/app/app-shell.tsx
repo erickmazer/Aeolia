@@ -60,9 +60,10 @@ export function AppShell({ userLabel, children }: { userLabel: string; children:
 
   return (
     <div className="relative z-0 mx-auto flex min-h-screen max-w-[480px] flex-col bg-[color:var(--color-ink)]">
-      {/* Header — fixo no topo (avatar + engrenagem) */}
+      {/* Header — fixo no topo (avatar + engrenagem). `fixed` (não sticky) porque
+          a cadeia flex de layout quebra o sticky; espelha a bottom bar. */}
       <header
-        className="sticky top-0 z-40 flex items-center justify-between px-5 pb-3 pt-6"
+        className="fixed inset-x-0 top-0 z-40 mx-auto flex max-w-[480px] items-center justify-between px-5 pb-3 pt-6"
         style={{
           background: 'var(--color-ink)',
           borderBottom: '1px solid color-mix(in oklch, var(--color-ash) 18%, transparent)',
@@ -89,8 +90,8 @@ export function AppShell({ userLabel, children }: { userLabel: string; children:
         </button>
       </header>
 
-      {/* Conteúdo (espaço pra bottom bar) */}
-      <main className="flex-1 px-5 pb-28">{children}</main>
+      {/* Conteúdo — pt- limpa o header fixo (~72px); pb- limpa a bottom bar */}
+      <main className="flex-1 px-5 pb-28 pt-20">{children}</main>
 
       {/* Bottom bar */}
       <nav

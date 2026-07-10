@@ -235,3 +235,24 @@ export function songsForTechnique(songs: Song[], id: TechniqueId): Song[] {
 export function songById(songs: Song[]): Record<string, Song> {
   return Object.fromEntries(songs.map((s) => [s.id, s]))
 }
+
+// ── Materiais (links + arquivos do professor) ────────────────────────────────
+export type MaterialKind = 'link' | 'file'
+
+export interface Material {
+  id: string
+  title: string
+  kind: MaterialKind
+  /** vínculo opcional a uma música (library_entry.id). */
+  entryId?: string
+  note?: string
+  /** MIME (só arquivos) — pra escolher ícone (pdf/imagem/áudio). */
+  mime?: string
+  source?: string
+  givenAt?: string
+  createdAt: string
+  /** URL pronta pra abrir: link direto, ou signed URL curta (arquivos). */
+  openUrl?: string
+  /** path no bucket (só arquivos) — necessário pra remover do storage. */
+  storagePath?: string
+}

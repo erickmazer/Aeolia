@@ -3,7 +3,7 @@
 
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import { createClient } from '@/lib/supabase/server'
-import type { Song, Status, Difficulty, TechniqueId, ContextId, Section, Priority, Stage } from './data'
+import type { Song, Status, Difficulty, TechniqueId, ContextId, Section, Priority, Stage, Material } from './data'
 import type { PracticeLogRow, PracticeSummary } from './practice'
 import { EMPTY_SUMMARY } from './practice'
 import { SEED_SONGS } from './seed-songs'
@@ -197,5 +197,61 @@ export async function getMyExercises(): Promise<Record<string, number>> {
     .eq('user_id', user.id)
   const out: Record<string, number> = {}
   for (const r of (data ?? []) as { exercise_id: string; level: number }[]) out[r.exercise_id] = r.level
+  return out
+}
+
+interface MaterialRow {
+  id: string
+  title: string
+  kind: 'link' | 'file'
+  url: string | null
+  storage_path: string | null
+  mime: string | null
+  note: string | null
+  entry_id: string | null
+  source: string | null
+  given_at: string | null
+  created_at: string
+}
+
+/**
+ * Materiais do usuário (links + arquivos). Para arquivos (bucket privado), gera
+ * uma signed URL curta em `openUrl`. Vazio se não logado / sem Supabase.
+ */
+export async function getMyMaterials(): Promise<Material[]> {
+  const user = await getCurrentUser()
+  if (!user) return []
+
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('materials')
+    .select('id, title, kind, url, storage_path, mime, note, entry_id, source, given_at, created_at')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  const rows = (data ?? []) as MaterialRow[]
+  const out: Material[] = []
+  for (const r of rows) {
+    let openUrl: string | undefined = r.kind === 'link' ? (r.url ?? undefined) : undefined
+    if (r.kind === 'file' && r.storage_path) {
+      const { data: signed } = await supabase.storage
+        .from('materials')
+        .createSignedUrl(r.storage_path, 3600)
+      openUrl = signed?.signedUrl
+    }
+    out.push({
+      id: r.id,
+      title: r.title,
+      kind: r.kind,
+      entryId: r.entry_id ?? undefined,
+      note: r.note ?? undefined,
+      mime: r.mime ?? undefined,
+      source: r.source ?? undefined,
+      givenAt: r.given_at ?? undefined,
+      createdAt: r.created_at,
+      openUrl,
+      storagePath: r.storage_path ?? undefined,
+    })
+  }
   return out
 }

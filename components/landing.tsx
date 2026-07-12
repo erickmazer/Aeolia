@@ -1,10 +1,14 @@
 import Link from 'next/link'
+import { Wordmark } from '@/components/brand/wordmark'
 
 export function Landing() {
   return (
     <div className="relative z-0 flex min-h-screen flex-col items-center justify-center bg-[color:var(--color-ink)] px-6 text-center">
       <div className="mx-auto max-w-md">
-        <h1 className="font-serif text-5xl leading-none text-[color:var(--color-paper)]">Aeolia</h1>
+        {/* Wordmark com ligadura (Æolia) — a variante de marca, perto do símbolo. */}
+        <h1 className="text-5xl leading-none text-[color:var(--color-paper)]">
+          <Wordmark ligature />
+        </h1>
         <p className="mt-4 leading-relaxed text-[color:var(--color-paper)]/85">
           Sua jornada musical — repertório, técnicas e progresso, organizados como um mapa da sua evolução.
         </p>

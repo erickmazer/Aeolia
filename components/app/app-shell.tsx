@@ -1,8 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { ToolsSheet } from '@/components/tools/tools-sheet'
 
 const TABS = [
   { href: '/today', label: 'Today', id: 'today' },
@@ -51,6 +53,7 @@ function NavIcon({ id }: { id: (typeof TABS)[number]['id'] }) {
 export function AppShell({ userLabel, children }: { userLabel: string; children: React.ReactNode }) {
   const pathname = usePathname()
   const initial = (userLabel.trim()[0] ?? 'A').toUpperCase()
+  const [toolsOpen, setToolsOpen] = useState(false)
 
   async function signOut() {
     const supabase = createClient()
@@ -80,15 +83,31 @@ export function AppShell({ userLabel, children }: { userLabel: string; children:
         >
           {initial}
         </div>
-        <button
-          type="button"
-          onClick={signOut}
-          aria-label="Conta / sair"
-          className="text-lg text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)]"
-        >
-          ⚙
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setToolsOpen(true)}
+            aria-label="Ferramentas (metrônomo e afinador)"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)]"
+          >
+            {/* diapasão / afinar */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M8 3v9a4 4 0 0 0 8 0V3" />
+              <path d="M12 16v5" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={signOut}
+            aria-label="Conta / sair"
+            className="flex h-9 w-9 items-center justify-center text-lg text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)]"
+          >
+            ⚙
+          </button>
+        </div>
       </header>
+
+      <ToolsSheet open={toolsOpen} onClose={() => setToolsOpen(false)} />
 
       {/* Conteúdo — pt- limpa o header fixo (~72px); pb- limpa a bottom bar */}
       <main className="flex-1 px-5 pb-28 pt-20">{children}</main>

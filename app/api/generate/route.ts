@@ -3,7 +3,7 @@ import { isSupabaseConfigured } from '@/lib/supabase/env'
 import { createClient } from '@/lib/supabase/server'
 import { aiClient, generateStructured } from '@/lib/ai/client'
 import { buildFichePrompt, ficheSchema, FICHE_MODEL, type FicheDraft } from '@/lib/library/fiche-ai'
-import type { Song, Difficulty, TechniqueId, ContextId } from '@/lib/library/data'
+import type { Song, Difficulty, TechniqueId, ContextId, Section } from '@/lib/library/data'
 
 export const runtime = 'nodejs'
 
@@ -20,6 +20,7 @@ interface CanonicalRow {
   best_lesson_label: string | null
   best_lesson_url: string | null
   notes: string | null
+  sections: Section[] | null
 }
 
 // Música canônica → Song (ainda sem entrada do usuário: status/relações vazios).
@@ -42,6 +43,7 @@ function canonicalToSong(c: CanonicalRow): Song {
       ? { label: c.best_lesson_label ?? 'estudar', url: c.best_lesson_url }
       : undefined,
     notes: c.notes ?? undefined,
+    sections: c.sections ?? [],
   }
 }
 
@@ -102,7 +104,7 @@ export async function POST(request: NextRequest) {
       schema: ficheSchema,
       toolName: 'salvar_ficha',
       toolDescription: 'Registra a ficha catalográfica da música.',
-      maxTokens: 1500,
+      maxTokens: 2200,
     })
     return NextResponse.json({ existing: false, draft })
   } catch (e) {

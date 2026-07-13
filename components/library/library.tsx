@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   STATUSES,
   TECHNIQUES,
@@ -105,9 +105,19 @@ function Chip({ active, onClick, children, count }: Toggle) {
   )
 }
 
-// ── Ficha da música ─────────────────────────────────────────────────────────
+// ── Ficha (agora em bottom sheet) ────────────────────────────────────────────
 
-function SongLinkList({ ids, empty, byId }: { ids: string[]; empty: string; byId: ById }) {
+function SongLinkList({
+  ids,
+  empty,
+  byId,
+  onOpen,
+}: {
+  ids: string[]
+  empty: string
+  byId: ById
+  onOpen: (song: Song) => void
+}) {
   const known = ids.map((id) => byId[id]).filter(Boolean)
   if (known.length === 0) {
     return <span className="text-sm italic text-[color:var(--color-ash)]">{empty}</span>
@@ -115,14 +125,15 @@ function SongLinkList({ ids, empty, byId }: { ids: string[]; empty: string; byId
   return (
     <div className="flex flex-wrap gap-2">
       {known.map((s) => (
-        <a
+        <button
           key={s.id}
-          href={`#song-${s.id}`}
+          type="button"
+          onClick={() => onOpen(s)}
           className="rounded-md px-2 py-1 text-sm text-[color:var(--color-paper)]/90 transition-colors hover:text-[color:var(--color-patina)]"
           style={{ background: 'color-mix(in oklch, var(--color-paper) 5%, transparent)' }}
         >
           {s.title}
-        </a>
+        </button>
       ))}
     </div>
   )
@@ -143,18 +154,20 @@ function ExternalLink({ label, url }: { label: string; url: string }) {
 
 function FicheRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-1 gap-1 sm:grid-cols-[10rem_1fr] sm:gap-4">
-      <div className="text-xs uppercase tracking-widest text-[color:var(--color-ash)] pt-0.5">{label}</div>
+    <div className="grid grid-cols-1 gap-1 sm:grid-cols-[9rem_1fr] sm:gap-4">
+      <div className="pt-0.5 text-xs uppercase tracking-widest text-[color:var(--color-ash)]">{label}</div>
       <div>{children}</div>
     </div>
   )
 }
 
-function SongCard({
+// A ficha completa de uma música, apresentada como folha sobreposta (bottom
+// sheet) em vez de expandir a lista inline — padrão mobile, espelha ToolsSheet.
+function SongSheet({
   song,
   byId,
-  expanded,
-  onToggle,
+  onClose,
+  onOpenSong,
   onPickTechnique,
   editable,
   onDelete,
@@ -164,8 +177,8 @@ function SongCard({
 }: {
   song: Song
   byId: ById
-  expanded: boolean
-  onToggle: () => void
+  onClose: () => void
+  onOpenSong: (song: Song) => void
   onPickTechnique: (id: TechniqueId) => void
   editable?: boolean
   onDelete?: (song: Song) => void
@@ -173,57 +186,71 @@ function SongCard({
   onSectionsChange?: (song: Song, sections: Section[]) => void
   materials?: Material[]
 }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [onClose])
+
   return (
-    <li
-      id={`song-${song.id}`}
-      className="scroll-mt-8 rounded-lg border transition-colors"
-      style={{
-        borderColor: 'color-mix(in oklch, var(--color-ash) 20%, transparent)',
-        background: expanded ? 'color-mix(in oklch, var(--color-paper) 3%, transparent)' : 'transparent',
-      }}
-    >
+    <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-label={`Ficha de ${song.title}`}>
       <button
         type="button"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        className="flex w-full items-center gap-4 px-4 py-4 text-left sm:px-5"
+        aria-label="Fechar ficha"
+        onClick={onClose}
+        className="absolute inset-0 motion-safe:animate-[songFade_120ms_ease-out]"
+        style={{ background: 'color-mix(in oklch, var(--color-ink) 70%, transparent)' }}
+      />
+      <div
+        className="relative z-10 max-h-[88vh] w-full max-w-[480px] overflow-y-auto rounded-t-2xl px-5 pb-10 pt-4 motion-safe:animate-[songUp_200ms_cubic-bezier(0.22,1,0.36,1)]"
+        style={{
+          background: 'color-mix(in oklch, var(--color-ink) 94%, var(--color-paper))',
+          borderTop: '1px solid color-mix(in oklch, var(--color-ash) 22%, transparent)',
+          boxShadow: '0 -20px 50px -20px rgba(0,0,0,0.6)',
+        }}
       >
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="font-serif text-lg text-[color:var(--color-paper)]">{song.title}</span>
-            <span className="text-sm italic text-[color:var(--color-ash)]">{song.artist}</span>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <StatusPill status={song.status} />
-            <DifficultyDots level={song.difficulty} />
-            {fit && <RelFitPill rd={fit.relativeDifficulty} />}
-          </div>
-          {song.sections && song.sections.length > 0 && (
-            <div className="mt-2"><ProgressBar sections={song.sections} /></div>
-          )}
-        </div>
-        <span
-          className="shrink-0 text-[color:var(--color-ash)] transition-transform"
-          style={{ transform: expanded ? 'rotate(90deg)' : 'none' }}
-          aria-hidden
-        >
-          →
-        </span>
-      </button>
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: 'color-mix(in oklch, var(--color-ash) 40%, transparent)' }} />
 
-      {expanded && (
-        <div
-          className="space-y-5 border-t px-4 py-5 sm:px-5"
-          style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 15%, transparent)' }}
-        >
+        <div className="mb-5 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="font-serif text-2xl leading-tight text-[color:var(--color-paper)]">{song.title}</h2>
+            <p className="mt-0.5 text-sm italic text-[color:var(--color-ash)]">{song.artist}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <StatusPill status={song.status} />
+              <DifficultyDots level={song.difficulty} />
+              {fit && <RelFitPill rd={fit.relativeDifficulty} />}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Fechar"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)]"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-5">
           <SectionsBlock song={song} editable={editable} onChange={(secs) => onSectionsChange?.(song, secs)} />
+
           <FicheRow label="Técnicas">
             <div className="flex flex-wrap gap-2">
               {song.techniques.map((t) => (
                 <button
                   key={t}
                   type="button"
-                  onClick={() => onPickTechnique(t)}
+                  onClick={() => {
+                    onPickTechnique(t)
+                    onClose()
+                  }}
                   className="rounded-full px-2.5 py-0.5 text-sm text-[color:var(--color-paper)]/90 transition-colors hover:text-[color:var(--color-patina)]"
                   style={{ background: 'color-mix(in oklch, var(--color-moss) 18%, transparent)' }}
                   title={TECHNIQUE_BY_ID[t]?.blurb}
@@ -256,11 +283,11 @@ function SongCard({
           )}
 
           <FicheRow label="Pré-requisitos">
-            <SongLinkList ids={song.prerequisites} empty="Nenhum — pode começar por aqui." byId={byId} />
+            <SongLinkList ids={song.prerequisites} empty="Nenhum — pode começar por aqui." byId={byId} onOpen={onOpenSong} />
           </FicheRow>
 
           <FicheRow label="Próximas">
-            <SongLinkList ids={song.nextSongs} empty="Fim de uma trilha (por enquanto)." byId={byId} />
+            <SongLinkList ids={song.nextSongs} empty="Fim de uma trilha (por enquanto)." byId={byId} onOpen={onOpenSong} />
           </FicheRow>
 
           {(song.bestVersion || song.bestLesson) && (
@@ -284,9 +311,7 @@ function SongCard({
 
           {song.notes && (
             <FicheRow label="Observações">
-              <p className="max-w-prose text-sm italic leading-relaxed text-[color:var(--color-paper)]/85">
-                {song.notes}
-              </p>
+              <p className="max-w-prose text-sm italic leading-relaxed text-[color:var(--color-paper)]/85">{song.notes}</p>
             </FicheRow>
           )}
 
@@ -317,7 +342,10 @@ function SongCard({
             <div className="pt-2">
               <button
                 type="button"
-                onClick={() => onDelete(song)}
+                onClick={() => {
+                  onDelete(song)
+                  onClose()
+                }}
                 className="text-xs uppercase tracking-widest text-[color:var(--color-ash)] transition-colors hover:text-[color:oklch(0.6_0.15_25)]"
               >
                 remover da biblioteca
@@ -325,7 +353,46 @@ function SongCard({
             </div>
           )}
         </div>
-      )}
+      </div>
+
+      <style>{`
+        @keyframes songFade { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes songUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
+      `}</style>
+    </div>
+  )
+}
+
+// Linha compacta da lista — toca pra abrir a ficha em folha (não expande inline).
+function SongRow({ song, fit, onOpen }: { song: Song; fit?: SongFit; onOpen: () => void }) {
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex w-full items-center gap-4 rounded-lg border px-4 py-4 text-left transition-colors hover:border-[color:var(--color-patina)] sm:px-5"
+        style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 20%, transparent)' }}
+      >
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="font-serif text-lg text-[color:var(--color-paper)]">{song.title}</span>
+            <span className="text-sm italic text-[color:var(--color-ash)]">{song.artist}</span>
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <StatusPill status={song.status} />
+            <DifficultyDots level={song.difficulty} />
+            {fit && <RelFitPill rd={fit.relativeDifficulty} />}
+          </div>
+          {song.sections && song.sections.length > 0 && (
+            <div className="mt-2">
+              <ProgressBar sections={song.sections} />
+            </div>
+          )}
+        </div>
+        <span className="shrink-0 text-[color:var(--color-ash)]" aria-hidden>
+          →
+        </span>
+      </button>
     </li>
   )
 }
@@ -351,9 +418,10 @@ export function Library({
   const [techniqueFilter, setTechniqueFilter] = useState<TechniqueId | null>(null)
   const [genreFilter, setGenreFilter] = useState<string | null>(null)
   const [query, setQuery] = useState('')
-  const [expanded, setExpanded] = useState<string | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const byId = useMemo(() => songById(songs), [songs])
+  const selected = selectedId ? (byId[selectedId] ?? null) : null
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -524,23 +592,26 @@ export function Library({
         ) : (
           <ul className="space-y-3">
             {filtered.map((song) => (
-              <SongCard
-                key={song.id}
-                song={song}
-                byId={byId}
-                expanded={expanded === song.id}
-                onToggle={() => setExpanded((cur) => (cur === song.id ? null : song.id))}
-                onPickTechnique={pickTechnique}
-                editable={editable}
-                onDelete={onDelete}
-                fit={fit?.[song.id]}
-                onSectionsChange={onSectionsChange}
-                materials={song.entryId ? materials?.[song.entryId] : undefined}
-              />
+              <SongRow key={song.id} song={song} fit={fit?.[song.id]} onOpen={() => setSelectedId(song.id)} />
             ))}
           </ul>
         )}
       </section>
+
+      {selected && (
+        <SongSheet
+          song={selected}
+          byId={byId}
+          onClose={() => setSelectedId(null)}
+          onOpenSong={(s) => setSelectedId(s.id)}
+          onPickTechnique={pickTechnique}
+          editable={editable}
+          onDelete={onDelete}
+          fit={fit?.[selected.id]}
+          onSectionsChange={onSectionsChange}
+          materials={selected.entryId ? materials?.[selected.entryId] : undefined}
+        />
+      )}
     </div>
   )
 }

@@ -1,19 +1,32 @@
-import { getCurrentUser, getMyExercises, getMySongs } from '@/lib/library/queries'
+import { getCurrentUser, getMyExercises, getMySongs, getPracticeSummary } from '@/lib/library/queries'
 import { deriveSkillXp } from '@/lib/library/skills'
 import { ExercisesPanel } from '@/components/library/exercises-panel'
+import { YouStats, AccountSection } from '@/components/app/you-panel'
 
 export const metadata = { title: 'Você' }
 
-// Fase 0 do revamp de IA: a aba "Você" reúne progresso (skills) + exercícios.
-// A Fase 3 traz também stats/streak e a conta (hoje o "sair" vive no header).
+// Fase 3 do revamp de IA: a aba "Você" consolida ritmo (streak/stats) + skills +
+// exercícios + conta. Vira o hub de progresso e identidade.
 export default async function VocePage() {
-  const [user, songs, levels] = await Promise.all([getCurrentUser(), getMySongs(), getMyExercises()])
+  const [user, songs, levels, summary] = await Promise.all([
+    getCurrentUser(),
+    getMySongs(),
+    getMyExercises(),
+    getPracticeSummary(),
+  ])
   const skills = deriveSkillXp(songs ?? [])
   const max = Math.max(1, ...skills.map((s) => s.xp))
+  const label =
+    (user?.user_metadata?.full_name as string | undefined) ??
+    (user?.user_metadata?.name as string | undefined) ??
+    user?.email ??
+    'você'
 
   return (
     <div className="pt-2">
-      <h1 className="mb-4 font-serif text-2xl">Você</h1>
+      <h1 className="mb-6 font-serif text-2xl">Você</h1>
+
+      <YouStats summary={summary} />
 
       <section className="mb-10">
         <h2 className="mb-3 text-xs uppercase tracking-widest text-[color:var(--color-ash)]">Suas skills</h2>
@@ -37,6 +50,8 @@ export default async function VocePage() {
       </section>
 
       {user && <ExercisesPanel userId={user.id} initialLevels={levels} />}
+
+      <AccountSection label={label} />
     </div>
   )
 }

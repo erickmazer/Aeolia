@@ -15,6 +15,7 @@ import {
   type Status,
   type TechniqueId,
   type Section,
+  type Material,
 } from '@/lib/library/data'
 import { RELATIVE_DIFFICULTY_LABEL, type SongFit } from '@/lib/library/personalization'
 import { SectionsBlock, ProgressBar } from './sections'
@@ -159,6 +160,7 @@ function SongCard({
   onDelete,
   fit,
   onSectionsChange,
+  materials,
 }: {
   song: Song
   byId: ById
@@ -169,6 +171,7 @@ function SongCard({
   onDelete?: (song: Song) => void
   fit?: SongFit
   onSectionsChange?: (song: Song, sections: Section[]) => void
+  materials?: Material[]
 }) {
   return (
     <li
@@ -287,6 +290,29 @@ function SongCard({
             </FicheRow>
           )}
 
+          {materials && materials.length > 0 && (
+            <FicheRow label="Materiais">
+              <ul className="flex flex-col gap-1.5">
+                {materials.map((m) => (
+                  <li key={m.id}>
+                    {m.openUrl ? (
+                      <a
+                        href={m.openUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-[color:var(--color-patina)] underline decoration-[color:var(--color-ash)] decoration-1 underline-offset-4 transition-colors hover:text-[color:var(--color-paper)]"
+                      >
+                        {m.kind === 'link' ? '🔗' : '📎'} {m.title}
+                      </a>
+                    ) : (
+                      <span className="text-sm text-[color:var(--color-paper)]/85">{m.title}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </FicheRow>
+          )}
+
           {editable && onDelete && (
             <div className="pt-2">
               <button
@@ -312,12 +338,14 @@ export function Library({
   onDelete,
   fit,
   onSectionsChange,
+  materials,
 }: {
   songs: Song[]
   editable?: boolean
   onDelete?: (song: Song) => void
   fit?: Record<string, SongFit>
   onSectionsChange?: (song: Song, sections: Section[]) => void
+  materials?: Record<string, Material[]>
 }) {
   const [statusFilter, setStatusFilter] = useState<Status | null>(null)
   const [techniqueFilter, setTechniqueFilter] = useState<TechniqueId | null>(null)
@@ -507,6 +535,7 @@ export function Library({
                 onDelete={onDelete}
                 fit={fit?.[song.id]}
                 onSectionsChange={onSectionsChange}
+                materials={song.entryId ? materials?.[song.entryId] : undefined}
               />
             ))}
           </ul>

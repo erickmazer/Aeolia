@@ -9,6 +9,7 @@ const TABS = [
   { href: '/songs', label: 'Songs', id: 'songs' },
   { href: '/practice', label: 'Practice', id: 'practice' },
   { href: '/exercises', label: 'Exercises', id: 'exercises' },
+  { href: '/materials', label: 'Materials', id: 'materials' },
 ] as const
 
 // Ícones da bottom bar — linha fina, herdam a cor do link (currentColor).
@@ -29,6 +30,14 @@ function NavIcon({ id }: { id: (typeof TABS)[number]['id'] }) {
         <path d="M9 18V6l10-2v10" />
         <circle cx="6.5" cy="18" r="2.5" fill="currentColor" stroke="none" />
         <circle cx="16.5" cy="16" r="2.5" fill="currentColor" stroke="none" />
+      </svg>
+    )
+  }
+  if (id === 'materials') {
+    // pasta / materiais
+    return (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       </svg>
     )
   }

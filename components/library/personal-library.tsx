@@ -4,13 +4,19 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Library } from './library'
 import { AddSong } from './add-song'
-import type { Song, Difficulty, TechniqueId, Section } from '@/lib/library/data'
+import type { Song, Difficulty, TechniqueId, Section, Material } from '@/lib/library/data'
 import type { FicheDraft } from '@/lib/library/fiche-ai'
 import type { SongFit, Suggestion, PersonalizationResult } from '@/lib/library/personalization'
 
 const borderStyle = { borderColor: 'color-mix(in oklch, var(--color-ash) 25%, transparent)' } as const
 
-export function PersonalLibrary({ initialSongs }: { initialSongs: Song[] }) {
+export function PersonalLibrary({
+  initialSongs,
+  materialsByEntry,
+}: {
+  initialSongs: Song[]
+  materialsByEntry?: Record<string, Material[]>
+}) {
   const [songs, setSongs] = useState<Song[]>(initialSongs)
   const [fit, setFit] = useState<Record<string, SongFit>>({})
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
@@ -176,7 +182,14 @@ export function PersonalLibrary({ initialSongs }: { initialSongs: Song[] }) {
         )}
       </section>
 
-      <Library songs={songs} editable onDelete={handleDelete} fit={fit} onSectionsChange={handleSectionsChange} />
+      <Library
+        songs={songs}
+        editable
+        onDelete={handleDelete}
+        fit={fit}
+        onSectionsChange={handleSectionsChange}
+        materials={materialsByEntry}
+      />
     </div>
   )
 }

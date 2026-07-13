@@ -31,7 +31,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <p className="mb-6 leading-relaxed text-[color:var(--color-paper)]/85">
           Entre para acessar a sua jornada.
         </p>
-        <SignInPanel next="/today" />
+        <SignInPanel next="/praticar" />
       </Centered>
     )
   }

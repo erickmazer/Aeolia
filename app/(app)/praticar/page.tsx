@@ -1,25 +1,30 @@
-import { getMySongs, getPracticeSummary } from '@/lib/library/queries'
-import { TodayCockpit } from '@/components/app/today-cockpit'
-import { PracticeMode } from '@/components/library/practice-mode'
+import { getMySongs, getPracticeSummary, getMyExercises } from '@/lib/library/queries'
+import { PracticeSession, type ExerciseSuggestion } from '@/components/practice/practice-session'
 import { RoadmapView } from '@/components/library/roadmap-view'
+import { EXERCISES, EX_MAX } from '@/lib/library/exercises'
+import { SKILLS } from '@/lib/library/data'
 
 export const metadata = { title: 'Praticar' }
 
-// Fase 0 do revamp de IA: a aba "Praticar" reagrupa o que hoje vive em Today +
-// Practice + a trilha (Roadmap). Por ora só empilha os componentes existentes;
-// a Fase 1 funde tudo num fluxo de sessão único.
+// Fase 1 do revamp: Praticar funde o antigo Today + Practice num fluxo de sessão
+// único (um item por vez), com a trilha (Roadmap) como espinha de progresso.
 export default async function PraticarPage() {
-  const [songs, summary] = await Promise.all([getMySongs(), getPracticeSummary()])
+  const [songs, summary, levels] = await Promise.all([
+    getMySongs(),
+    getPracticeSummary(),
+    getMyExercises(),
+  ])
   const list = songs ?? []
 
-  return (
-    <div className="space-y-12 pt-2">
-      <TodayCockpit initialSongs={list} summary={summary} />
+  // Sugere o primeiro exercício ainda não dominado (nível de treino < máximo).
+  const ex = EXERCISES.find((e) => (levels[e.id] ?? 0) < EX_MAX)
+  const exercise: ExerciseSuggestion | null = ex
+    ? { name: ex.nome, desc: ex.desc, skill: SKILLS.find((s) => s.id === ex.alvo)?.name ?? ex.alvo }
+    : null
 
-      <section>
-        <h2 className="mb-4 font-serif text-2xl">Modo prática</h2>
-        <PracticeMode initialSongs={list} summary={summary} />
-      </section>
+  return (
+    <div className="space-y-14 pt-2">
+      <PracticeSession initialSongs={list} summary={summary} exercise={exercise} />
 
       <section>
         <h2 className="mb-4 font-serif text-2xl">Sua trilha</h2>

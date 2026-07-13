@@ -1,26 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  SECTION_STATUS_LABEL,
-  sectionProgress,
-  type Section,
-  type SectionStatus,
-  type Song,
-} from '@/lib/library/data'
+import { SECTION_STATUS_LABEL, sectionProgress, type Section, type Song } from '@/lib/library/data'
+import { NEXT_SECTION_STATUS, SECTION_STATUS_COLOR as STATUS_COLOR } from '@/lib/library/section-progress'
 import { ChordRow } from './chord-diagram'
-
-const STATUS_COLOR: Record<SectionStatus, string> = {
-  'a-fazer': 'var(--color-ash)',
-  praticando: 'var(--color-patina)',
-  dominada: 'var(--color-moss)',
-}
-
-const NEXT_STATUS: Record<SectionStatus, SectionStatus> = {
-  'a-fazer': 'praticando',
-  praticando: 'dominada',
-  dominada: 'a-fazer',
-}
 
 function newId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
@@ -67,7 +50,7 @@ export function SectionsBlock({
   }
 
   function cycle(id: string) {
-    commit(sections.map((s) => (s.id === id ? { ...s, status: NEXT_STATUS[s.status] } : s)))
+    commit(sections.map((s) => (s.id === id ? { ...s, status: NEXT_SECTION_STATUS[s.status] } : s)))
   }
 
   function remove(id: string) {

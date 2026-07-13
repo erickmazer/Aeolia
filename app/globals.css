@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+/* Zodiak (Fontshare / Indian Type Foundry) — a fonte da marca. Auto-hospedada
+   em /public/fonts (gerada por scripts/build-brand.mjs a partir do .ttf). Até os
+   woff2 existirem, cai graciosamente em Georgia (o build não quebra). */
+@font-face {
+  font-family: 'Zodiak';
+  src: url('/fonts/zodiak-regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Zodiak';
+  src: url('/fonts/zodiak-bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   /* Muted Earthen Dark Palette (OKLCH) */
   --color-ink: oklch(0.15 0.01 80);        /* warm near-black */
@@ -8,11 +26,14 @@
   --color-moss: oklch(0.45 0.03 130);      /* muted deep green */
   --color-ash: oklch(0.60 0.02 90);        /* muted gray-brown — WCAG AA compliant on ink */
 
-  /* Font Families — títulos em serifada, o resto em sem-serifa. */
+  /* Font Families — títulos na serifada de marca, o resto em sem-serifa. */
   --font-serif-jp: var(--font-shippori-mincho);
   --font-serif-latin: Georgia, serif;
-  /* A classe utilitária `font-serif` (usada só nos títulos) aponta pra latina. */
-  --font-serif: var(--font-serif-latin);
+  /* Zodiak é a fonte da marca (wordmark + títulos); Georgia é o fallback até o
+     woff2 carregar. */
+  --font-brand: 'Zodiak', Georgia, serif;
+  /* A classe utilitária `font-serif` (usada nos títulos) aponta pra marca. */
+  --font-serif: var(--font-brand);
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
 

@@ -14,10 +14,19 @@ export const metadata: Metadata = {
     "Aeolia — plataforma para músicos organizarem repertório, técnicas e a evolução dos seus estudos.",
   robots: { index: true, follow: true },
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Aeolia" },
+  icons: {
+    // Ícones da marca (tile Æ). Os PNGs são gerados por scripts/build-brand.mjs;
+    // o favicon.svg vetorial é o principal em navegadores que o suportam.
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1c1a17",
+  themeColor: "#1a1712",
 };
 
 export default function RootLayout({

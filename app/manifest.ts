@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Aeolia',
     short_name: 'Aeolia',
     description: 'Biblioteca do Violonista — o mapa da sua jornada no violão.',
-    start_url: '/',
+    start_url: '/praticar',
     display: 'standalone',
     background_color: INK,
     theme_color: INK,

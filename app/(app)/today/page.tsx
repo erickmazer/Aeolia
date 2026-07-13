@@ -1,9 +1,6 @@
-import { getMySongs, getPracticeSummary } from '@/lib/library/queries'
-import { TodayCockpit } from '@/components/app/today-cockpit'
+import { redirect } from 'next/navigation'
 
-export const metadata = { title: 'Today' }
-
-export default async function TodayPage() {
-  const [songs, summary] = await Promise.all([getMySongs(), getPracticeSummary()])
-  return <TodayCockpit initialSongs={songs ?? []} summary={summary} />
+// Revamp de IA: Today foi absorvido pela aba "Praticar".
+export default function TodayRedirect() {
+  redirect('/praticar')
 }

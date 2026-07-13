@@ -7,54 +7,35 @@ import { createClient } from '@/lib/supabase/client'
 import { ToolsSheet } from '@/components/tools/tools-sheet'
 
 const TABS = [
-  { href: '/today', label: 'Today', id: 'today' },
-  { href: '/songs', label: 'Songs', id: 'songs' },
-  { href: '/practice', label: 'Practice', id: 'practice' },
-  { href: '/exercises', label: 'Exercises', id: 'exercises' },
-  { href: '/materials', label: 'Materials', id: 'materials' },
+  { href: '/praticar', label: 'Praticar', id: 'praticar' },
+  { href: '/biblioteca', label: 'Biblioteca', id: 'biblioteca' },
+  { href: '/voce', label: 'Você', id: 'voce' },
 ] as const
 
 // Ícones da bottom bar — linha fina, herdam a cor do link (currentColor).
 function NavIcon({ id }: { id: (typeof TABS)[number]['id'] }) {
-  if (id === 'today') {
-    // sol / "hoje"
-    return (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4" />
-      </svg>
-    )
-  }
-  if (id === 'songs') {
-    // nota musical / repertório
-    return (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M9 18V6l10-2v10" />
-        <circle cx="6.5" cy="18" r="2.5" fill="currentColor" stroke="none" />
-        <circle cx="16.5" cy="16" r="2.5" fill="currentColor" stroke="none" />
-      </svg>
-    )
-  }
-  if (id === 'materials') {
-    // pasta / materiais
-    return (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      </svg>
-    )
-  }
-  if (id === 'practice') {
-    // play / modo prática
+  if (id === 'praticar') {
+    // play / praticar (prática + trilha)
     return (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <polygon points="8 5 19 12 8 19" />
       </svg>
     )
   }
-  // barras / exercícios (drills)
+  if (id === 'biblioteca') {
+    // livro / acervo (músicas + materiais)
+    return (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 0-3 3z" />
+        <path d="M5 4v16" />
+      </svg>
+    )
+  }
+  // pessoa / você (progresso + conta)
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M6 20V10M12 20V4M18 20v-7" />
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21a8 8 0 0 1 16 0" />
     </svg>
   )
 }

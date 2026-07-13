@@ -40,7 +40,12 @@ if (!boldFile) {
 const regularFile = find(/regular/i)
 
 const boldPath = path.join(FONT_DIR, boldFile)
-const font = await opentype.load(boldPath)
+// opentype.parse(ArrayBuffer) — a API atual (o antigo .load() foi deprecado).
+function loadFont(p) {
+  const buf = fs.readFileSync(p)
+  return opentype.parse(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength))
+}
+const font = loadFont(boldPath)
 
 mkdir('public/fonts')
 mkdir('public/icons')

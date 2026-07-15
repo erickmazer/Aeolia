@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { artworkHiRes } from '@/lib/library/artwork'
 
 const borderStyle = { borderColor: 'color-mix(in oklch, var(--color-ash) 25%, transparent)' } as const
 
@@ -14,11 +15,6 @@ const STEPS = [
   'Sugerindo partes e acordes…',
 ]
 const STEP_MS = 1500
-
-// Capas do iTunes vêm em 60×60; sobe pra 200 pra ficar nítida no herói.
-function hiRes(url: string): string {
-  return url.replace(/\/\d+x\d+bb\./, '/200x200bb.')
-}
 
 /**
  * Estado de "gerando ficha" — herói com a capa do álbum (quando veio do
@@ -60,7 +56,7 @@ export function GeneratingFiche({
           {artwork ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={hiRes(artwork)} alt="" className="h-full w-full object-cover" />
+              <img src={artworkHiRes(artwork)} alt="" className="h-full w-full object-cover" />
               <div
                 className="absolute inset-0"
                 style={{ background: 'color-mix(in oklch, var(--color-ink) 30%, transparent)' }}

@@ -171,6 +171,8 @@ export interface Song {
   sections?: Section[]
   /** gênero canônico (público). Ex.: MPB, Folk, Rock. */
   genre?: string
+  /** URL da capa do álbum (canônica, vinda do autocomplete). */
+  artwork?: string
   /** coleções pessoais (labels livres do usuário). Ex.: Aurora, Favoritas. */
   collections?: string[]
   /** prioridade de aprendizado (privado). */

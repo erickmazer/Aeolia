@@ -35,8 +35,11 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [artist, setArtist] = useState('')
-  // capa vinda do autocomplete (iTunes), só pra enriquecer o estado de geração
+  // capa vinda do autocomplete (iTunes); persiste no canônico ao salvar
   const [artwork, setArtwork] = useState<string | null>(null)
+  // veio do autocomplete? então o título/artista do iTunes é o "nome bonitinho"
+  // canônico (a IA pode reformatar) e a capa é persistida.
+  const [fromSearch, setFromSearch] = useState(false)
   const [phase, setPhase] = useState<Phase>('idle')
   // fallback pra músicas que a base não acha (regionais, autorais)
   const [manual, setManual] = useState(false)
@@ -50,6 +53,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
     setTitle('')
     setArtist('')
     setArtwork(null)
+    setFromSearch(false)
     setManual(false)
     setDraft(null)
     setExisting(null)
@@ -121,12 +125,17 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
     if (!draft) return
     setPhase('saving')
     setError(null)
+    // Nome canônico: quando veio do autocomplete, o do iTunes é o "bonitinho"
+    // (a IA pode reformatar título/artista); no manual, fica o do rascunho.
+    const canonTitle = fromSearch ? title.trim() : draft.title
+    const canonArtist = fromSearch ? artist.trim() : draft.artist
+    const canonArtwork = fromSearch ? artwork : null
     try {
       const supabase = createClient()
       const { data, error: dbError } = await supabase
         .rpc('create_canonical_and_add', {
-          _title: draft.title,
-          _artist: draft.artist,
+          _title: canonTitle,
+          _artist: canonArtist,
           _difficulty: draft.difficulty,
           _techniques: draft.techniques,
           _genre: draft.genre,
@@ -136,6 +145,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
           _best_lesson_url: draft.bestLesson?.url ?? null,
           _notes: draft.notes || null,
           _sections: sectionsFromDraft(draft.sections),
+          _artwork: canonArtwork,
         })
         .single()
       const entry = data as { id: string; song_id: string } | null
@@ -143,8 +153,8 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
 
       onAdded({
         id: entry.song_id,
-        title: draft.title,
-        artist: draft.artist,
+        title: canonTitle,
+        artist: canonArtist,
         difficulty: draft.difficulty as Difficulty,
         status: draft.status,
         techniques: draft.techniques as TechniqueId[],
@@ -155,6 +165,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
         bestVersion: draft.bestVersion,
         bestLesson: draft.bestLesson,
         notes: draft.notes || undefined,
+        artwork: canonArtwork ?? undefined,
         entryId: entry.id,
         sections: sectionsFromDraft(draft.sections),
       })
@@ -198,6 +209,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
               setTitle(t)
               setArtist(a)
               setArtwork(art ?? null)
+              setFromSearch(true)
               generate(t, a)
             }}
           />
@@ -217,6 +229,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
             type="button"
             onClick={() => {
               setArtwork(null)
+              setFromSearch(false)
               generate()
             }}
             disabled={!title.trim() || !artist.trim()}

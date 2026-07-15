@@ -5,6 +5,17 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ToolsSheet } from '@/components/tools/tools-sheet'
+import { PageTransition } from './page-transition'
+
+// Chrome (header + bottom bar) com vidro fosco: fundo translúcido + blur, em vez
+// de barra opaca com borda dura. Cai num fundo sólido se o navegador não tiver
+// backdrop-filter.
+const glass = (tint: number) =>
+  ({
+    background: `color-mix(in oklch, var(--color-ink) ${tint}%, transparent)`,
+    backdropFilter: 'blur(14px) saturate(1.4)',
+    WebkitBackdropFilter: 'blur(14px) saturate(1.4)',
+  }) as const
 
 const TABS = [
   { href: '/praticar', label: 'Praticar', id: 'praticar' },
@@ -58,8 +69,8 @@ export function AppShell({ userLabel, children }: { userLabel: string; children:
       <header
         className="fixed inset-x-0 top-0 z-40 mx-auto flex max-w-[480px] items-center justify-between px-5 pb-3 pt-6"
         style={{
-          background: 'var(--color-ink)',
-          borderBottom: '1px solid color-mix(in oklch, var(--color-ash) 18%, transparent)',
+          ...glass(62),
+          borderBottom: '1px solid color-mix(in oklch, var(--color-ash) 14%, transparent)',
         }}
       >
         <div
@@ -78,7 +89,7 @@ export function AppShell({ userLabel, children }: { userLabel: string; children:
             type="button"
             onClick={() => setToolsOpen(true)}
             aria-label="Ferramentas (metrônomo e afinador)"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)]"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)] active:scale-90"
           >
             {/* diapasão / afinar */}
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -90,9 +101,13 @@ export function AppShell({ userLabel, children }: { userLabel: string; children:
             type="button"
             onClick={signOut}
             aria-label="Conta / sair"
-            className="flex h-9 w-9 items-center justify-center text-lg text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)]"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)] active:scale-90"
           >
-            ⚙
+            {/* engrenagem / conta */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
           </button>
         </div>
       </header>
@@ -100,14 +115,17 @@ export function AppShell({ userLabel, children }: { userLabel: string; children:
       <ToolsSheet open={toolsOpen} onClose={() => setToolsOpen(false)} />
 
       {/* Conteúdo — pt- limpa o header fixo (~72px); pb- limpa a bottom bar */}
-      <main className="flex-1 px-5 pb-28 pt-20">{children}</main>
+      <main className="flex-1 px-5 pb-28 pt-20">
+        <PageTransition>{children}</PageTransition>
+      </main>
 
       {/* Bottom bar */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-w-[480px] justify-around border-t px-2 pb-6 pt-3"
+        className="fixed inset-x-0 bottom-0 z-40 mx-auto flex max-w-[480px] justify-around border-t px-2 pt-2.5"
         style={{
-          background: 'color-mix(in oklch, var(--color-ink) 92%, var(--color-paper))',
-          borderColor: 'color-mix(in oklch, var(--color-ash) 22%, transparent)',
+          ...glass(70),
+          borderColor: 'color-mix(in oklch, var(--color-ash) 16%, transparent)',
+          paddingBottom: 'calc(0.6rem + env(safe-area-inset-bottom))',
         }}
       >
         {TABS.map((t) => {
@@ -117,10 +135,18 @@ export function AppShell({ userLabel, children }: { userLabel: string; children:
               key={t.href}
               href={t.href}
               aria-current={active ? 'page' : undefined}
-              className="flex flex-1 flex-col items-center gap-1 text-xs tracking-wide transition-colors"
+              className="flex flex-1 flex-col items-center gap-1 text-xs tracking-wide transition-transform active:scale-90"
               style={{ color: active ? 'var(--color-patina)' : 'var(--color-ash)' }}
             >
-              <NavIcon id={t.id} />
+              {/* pílula que acende atrás do ícone da aba ativa */}
+              <span
+                className="flex h-8 w-16 items-center justify-center rounded-full transition-colors duration-300"
+                style={{
+                  background: active ? 'color-mix(in oklch, var(--color-patina) 16%, transparent)' : 'transparent',
+                }}
+              >
+                <NavIcon id={t.id} />
+              </span>
               {t.label}
             </Link>
           )

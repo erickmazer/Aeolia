@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Library } from './library'
 import { AddSong } from './add-song'
 import type { Song, Difficulty, TechniqueId, Section, Material } from '@/lib/library/data'
-import type { FicheDraft } from '@/lib/library/fiche-ai'
+import { sectionsFromDraft, type FicheDraft } from '@/lib/library/fiche-ai'
 import type { SongFit, Suggestion, PersonalizationResult } from '@/lib/library/personalization'
 
 const borderStyle = { borderColor: 'color-mix(in oklch, var(--color-ash) 25%, transparent)' } as const
@@ -72,6 +72,7 @@ export function PersonalLibrary({
         _best_lesson_label: draft.bestLesson?.label ?? null,
         _best_lesson_url: draft.bestLesson?.url ?? null,
         _notes: draft.notes || null,
+        _sections: sectionsFromDraft(draft.sections),
       })
       .single()
     const entry = data as { id: string; song_id: string } | null
@@ -91,6 +92,7 @@ export function PersonalLibrary({
       bestLesson: draft.bestLesson,
       notes: draft.notes || undefined,
       entryId: entry.id,
+      sections: sectionsFromDraft(draft.sections),
     }
   }
 

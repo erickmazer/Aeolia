@@ -13,7 +13,7 @@ import {
   type Difficulty,
   type TechniqueId,
 } from '@/lib/library/data'
-import type { FicheDraft } from '@/lib/library/fiche-ai'
+import { sectionsFromDraft, type FicheDraft } from '@/lib/library/fiche-ai'
 
 interface Draft extends FicheDraft {
   status: Status
@@ -97,6 +97,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
         prerequisites: [],
         nextSongs: [],
         entryId: entry.id,
+        sections: existing.sections ?? [],
       })
       reset()
     } catch (e) {
@@ -124,6 +125,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
           _best_lesson_label: draft.bestLesson?.label ?? null,
           _best_lesson_url: draft.bestLesson?.url ?? null,
           _notes: draft.notes || null,
+          _sections: sectionsFromDraft(draft.sections),
         })
         .single()
       const entry = data as { id: string; song_id: string } | null
@@ -144,6 +146,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
         bestLesson: draft.bestLesson,
         notes: draft.notes || undefined,
         entryId: entry.id,
+        sections: sectionsFromDraft(draft.sections),
       })
       reset()
     } catch (e) {
@@ -325,6 +328,25 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
               onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
             />
           </label>
+
+          {draft.sections && draft.sections.length > 0 && (
+            <div>
+              <div className="mb-2 text-xs uppercase tracking-widest text-[color:var(--color-ash)]">
+                Partes sugeridas <span className="normal-case tracking-normal">· acordes a conferir</span>
+              </div>
+              <ul className="flex flex-col gap-1.5">
+                {draft.sections.map((s, i) => (
+                  <li key={i} className="flex flex-wrap items-baseline gap-x-3 text-sm">
+                    <span className="text-[color:var(--color-paper)]/90">{s.name}</span>
+                    {s.chords && <span className="font-mono text-xs text-[color:var(--color-patina)]">{s.chords}</span>}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs italic text-[color:var(--color-ash)]">
+                Entram como rascunho no seu progresso — dá pra ajustar os acordes depois, na ficha.
+              </p>
+            </div>
+          )}
 
           <button
             type="button"

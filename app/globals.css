@@ -57,3 +57,50 @@ body {
     border-radius: 2px;
   }
 }
+
+/* ── Primitivos de movimento (reutilizáveis pela UI do app) ─────────────────
+   Skeleton com shimmer + entrada suave. Respeitam prefers-reduced-motion. */
+@keyframes aeolia-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes aeolia-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in oklch, var(--color-paper) 8%, transparent);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--color-paper) 12%, transparent),
+    transparent
+  );
+  animation: aeolia-shimmer 1.6s ease-in-out infinite;
+}
+.aeolia-rise {
+  animation: aeolia-rise 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after,
+  .aeolia-rise {
+    animation: none;
+  }
+}

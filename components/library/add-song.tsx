@@ -14,6 +14,8 @@ import {
   type TechniqueId,
 } from '@/lib/library/data'
 import { sectionsFromDraft, type FicheDraft } from '@/lib/library/fiche-ai'
+import { SongSearch } from './song-search'
+import { GeneratingFiche } from './generating-fiche'
 
 interface Draft extends FicheDraft {
   status: Status
@@ -33,7 +35,11 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [artist, setArtist] = useState('')
+  // capa vinda do autocomplete (iTunes), só pra enriquecer o estado de geração
+  const [artwork, setArtwork] = useState<string | null>(null)
   const [phase, setPhase] = useState<Phase>('idle')
+  // fallback pra músicas que a base não acha (regionais, autorais)
+  const [manual, setManual] = useState(false)
   const [draft, setDraft] = useState<Draft | null>(null)
   // música já no catálogo (dedup hit): adiciona sem chamar IA nem editar a ficha
   const [existing, setExisting] = useState<Song | null>(null)
@@ -43,6 +49,8 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
   function reset() {
     setTitle('')
     setArtist('')
+    setArtwork(null)
+    setManual(false)
     setDraft(null)
     setExisting(null)
     setExistingStatus('quero-aprender')
@@ -51,8 +59,10 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
     setOpen(false)
   }
 
-  async function generate() {
-    if (!title.trim() || !artist.trim()) return
+  async function generate(overrideTitle?: string, overrideArtist?: string) {
+    const t = (overrideTitle ?? title).trim()
+    const a = (overrideArtist ?? artist).trim()
+    if (!t || !a) return
     setPhase('generating')
     setError(null)
     setDraft(null)
@@ -61,7 +71,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ title, artist }),
+        body: JSON.stringify({ title: t, artist: a }),
       })
       const payload = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(payload.error ?? `Erro ${res.status}`)
@@ -177,20 +187,53 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
         </button>
       </div>
 
-      {/* Entrada */}
-      <div className="flex flex-wrap gap-2">
-        <input className={inputClass} style={borderStyle} placeholder="Título" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <input className={inputClass} style={borderStyle} placeholder="Artista" value={artist} onChange={(e) => setArtist(e.target.value)} />
-        <button
-          type="button"
-          onClick={generate}
-          disabled={phase === 'generating' || !title.trim() || !artist.trim()}
-          className="rounded-md px-4 py-2 text-sm text-[color:var(--color-ink)] transition-opacity disabled:opacity-40"
-          style={{ background: 'var(--color-patina)' }}
-        >
-          {phase === 'generating' ? 'buscando…' : 'buscar / gerar'}
-        </button>
-      </div>
+      {/* Entrada: busca (principal) → fallback manual → estado de geração.
+          Durante a geração, a entrada dá lugar ao herói com capa + skeleton. */}
+      {phase === 'generating' ? (
+        <GeneratingFiche title={title} artist={artist} artwork={artwork} />
+      ) : !manual ? (
+        <div className="space-y-2">
+          <SongSearch
+            onPick={({ title: t, artist: a, artwork: art }) => {
+              setTitle(t)
+              setArtist(a)
+              setArtwork(art ?? null)
+              generate(t, a)
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => setManual(true)}
+            className="text-xs text-[color:var(--color-ash)] underline decoration-dotted underline-offset-2 transition-colors hover:text-[color:var(--color-paper)]"
+          >
+            digitar manualmente
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          <input className={inputClass} style={borderStyle} placeholder="Título" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <input className={inputClass} style={borderStyle} placeholder="Artista" value={artist} onChange={(e) => setArtist(e.target.value)} />
+          <button
+            type="button"
+            onClick={() => {
+              setArtwork(null)
+              generate()
+            }}
+            disabled={!title.trim() || !artist.trim()}
+            className="rounded-md px-4 py-2 text-sm text-[color:var(--color-ink)] transition-opacity disabled:opacity-40"
+            style={{ background: 'var(--color-patina)' }}
+          >
+            buscar / gerar
+          </button>
+          <button
+            type="button"
+            onClick={() => setManual(false)}
+            className="self-center text-xs text-[color:var(--color-ash)] underline decoration-dotted underline-offset-2 hover:text-[color:var(--color-paper)]"
+          >
+            voltar à busca
+          </button>
+        </div>
+      )}
 
       {error && <p className="mt-3 text-sm text-[color:oklch(0.65_0.15_25)]">{error}</p>}
 

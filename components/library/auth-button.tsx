@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { Loading } from '@/components/app/spinner'
 
 const linkClass =
   'text-sm text-[color:var(--color-patina)] underline decoration-[color:var(--color-ash)] decoration-1 underline-offset-4 transition-colors hover:text-[color:var(--color-paper)]'
@@ -59,7 +60,7 @@ function EmailSignIn({ next }: { next: string }) {
         className="rounded-md px-4 py-2 text-sm text-[color:var(--color-ink)] transition-opacity disabled:opacity-40"
         style={{ background: 'var(--color-patina)' }}
       >
-        {state === 'sending' ? 'enviando…' : 'enviar link'}
+        {state === 'sending' ? <Loading>enviando…</Loading> : 'enviar link'}
       </button>
       {state === 'error' && <span className="w-full text-sm text-[color:oklch(0.65_0.15_25)]">{msg}</span>}
     </form>

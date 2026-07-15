@@ -16,6 +16,7 @@ import {
 import { sectionsFromDraft, type FicheDraft } from '@/lib/library/fiche-ai'
 import { SongSearch } from './song-search'
 import { GeneratingFiche } from './generating-fiche'
+import { Loading } from '@/components/app/spinner'
 
 interface Draft extends FicheDraft {
   status: Status
@@ -295,7 +296,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
             className="rounded-md px-4 py-2 text-sm text-[color:var(--color-ink)] transition-opacity disabled:opacity-40"
             style={{ background: 'var(--color-moss)' }}
           >
-            {phase === 'saving' ? 'adicionando…' : 'adicionar à minha biblioteca'}
+            {phase === 'saving' ? <Loading>adicionando…</Loading> : 'adicionar à minha biblioteca'}
           </button>
         </div>
       )}
@@ -411,7 +412,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
             className="rounded-md px-4 py-2 text-sm text-[color:var(--color-ink)] transition-opacity disabled:opacity-40"
             style={{ background: 'var(--color-moss)' }}
           >
-            {phase === 'saving' ? 'salvando…' : 'salvar na minha biblioteca'}
+            {phase === 'saving' ? <Loading>salvando…</Loading> : 'salvar na minha biblioteca'}
           </button>
         </div>
       )}

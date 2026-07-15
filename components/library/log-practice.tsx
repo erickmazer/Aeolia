@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { localDay } from '@/lib/library/practice'
+import { Loading } from '@/components/app/spinner'
 
 interface Props {
   entryId?: string
@@ -69,7 +70,7 @@ export function LogPractice({ entryId, songId, sectionId, onLogged, variant = 's
             : { borderColor: 'color-mix(in oklch, var(--color-ash) 30%, transparent)' }
         }
       >
-        {state === 'done' ? '✓ Registrado' : state === 'saving' ? 'Salvando…' : '＋ Pratiquei'}
+        {state === 'done' ? '✓ Registrado' : state === 'saving' ? <Loading>Salvando…</Loading> : '＋ Pratiquei'}
       </button>
 
       {showMin ? (

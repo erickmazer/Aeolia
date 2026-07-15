@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Material, MaterialKind } from '@/lib/library/data'
+import { Loading } from '@/components/app/spinner'
 
 const inputClass =
   'w-full rounded-md border bg-transparent px-3 py-2 text-sm text-[color:var(--color-paper)] placeholder:text-[color:var(--color-ash)] outline-none'
@@ -252,7 +253,7 @@ export function MaterialsView({
               className="rounded-md px-4 py-2 text-sm text-[color:var(--color-ink)] disabled:opacity-40"
               style={{ background: 'var(--color-moss)' }}
             >
-              {busy ? 'salvando…' : 'salvar'}
+              {busy ? <Loading>salvando…</Loading> : 'salvar'}
             </button>
             <button
               type="button"

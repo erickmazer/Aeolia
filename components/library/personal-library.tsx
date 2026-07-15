@@ -7,6 +7,7 @@ import { AddSong } from './add-song'
 import type { Song, Difficulty, TechniqueId, Section, Material } from '@/lib/library/data'
 import { sectionsFromDraft, type FicheDraft } from '@/lib/library/fiche-ai'
 import type { SongFit, Suggestion, PersonalizationResult } from '@/lib/library/personalization'
+import { Loading } from '@/components/app/spinner'
 
 const borderStyle = { borderColor: 'color-mix(in oklch, var(--color-ash) 25%, transparent)' } as const
 
@@ -142,7 +143,13 @@ export function PersonalLibrary({
             className="rounded-md px-3 py-1.5 text-sm text-[color:var(--color-ink)] transition-opacity disabled:opacity-40"
             style={{ background: 'var(--color-patina)' }}
           >
-            {pState === 'loading' ? 'pensando…' : suggestions.length ? 'atualizar sugestões' : 'gerar sugestões'}
+            {pState === 'loading' ? (
+              <Loading>pensando…</Loading>
+            ) : suggestions.length ? (
+              'atualizar sugestões'
+            ) : (
+              'gerar sugestões'
+            )}
           </button>
         </div>
         <p className="mb-5 max-w-prose text-sm leading-relaxed text-[color:var(--color-ash)]">
@@ -151,6 +158,25 @@ export function PersonalLibrary({
         </p>
 
         {pError && <p className="mb-4 text-sm text-[color:oklch(0.65_0.15_25)]">{pError}</p>}
+
+        {/* Skeleton enquanto a IA pensa (1ª geração) — no lugar de tela vazia. */}
+        {pState === 'loading' && suggestions.length === 0 && (
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2" aria-hidden>
+            {[0, 1].map((i) => (
+              <li key={i} className="rounded-lg border p-4" style={borderStyle}>
+                <div className="skeleton h-4 w-2/3 rounded" />
+                <div className="mt-3 space-y-2">
+                  <div className="skeleton h-3 w-full rounded" />
+                  <div className="skeleton h-3 w-4/5 rounded" />
+                </div>
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="skeleton h-3 w-16 rounded" />
+                  <div className="skeleton h-7 w-24 rounded-md" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
 
         {suggestions.length > 0 && (
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -174,7 +200,7 @@ export function PersonalLibrary({
                       className="rounded-md px-3 py-1.5 text-sm text-[color:var(--color-ink)] transition-opacity disabled:opacity-40"
                       style={{ background: 'var(--color-moss)' }}
                     >
-                      {addingKey === key ? 'adicionando…' : '+ adicionar'}
+                      {addingKey === key ? <Loading>adicionando…</Loading> : '+ adicionar'}
                     </button>
                   </div>
                 </li>

@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 import type { MusicSearchResult } from '@/app/api/music-search/route'
+import { Spinner } from '@/components/app/spinner'
 
 const inputClass =
   'rounded-md border bg-transparent px-3 py-2 text-sm text-[color:var(--color-paper)] placeholder:text-[color:var(--color-ash)]'
@@ -139,7 +140,9 @@ export function SongSearch({ onPick, disabled }: SongSearchProps) {
           }}
         >
           {loading && results.length === 0 && (
-            <li className="px-3 py-2 text-sm italic text-[color:var(--color-ash)]">buscando…</li>
+            <li className="flex items-center gap-2 px-3 py-2 text-sm italic text-[color:var(--color-ash)]">
+              <Spinner /> buscando…
+            </li>
           )}
 
           {results.map((r, i) => (

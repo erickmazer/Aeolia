@@ -15,6 +15,7 @@ import {
 } from '@/lib/library/data'
 import { sectionsFromDraft, type FicheDraft } from '@/lib/library/fiche-ai'
 import { SongSearch } from './song-search'
+import { GeneratingFiche } from './generating-fiche'
 
 interface Draft extends FicheDraft {
   status: Status
@@ -34,6 +35,8 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [artist, setArtist] = useState('')
+  // capa vinda do autocomplete (iTunes), só pra enriquecer o estado de geração
+  const [artwork, setArtwork] = useState<string | null>(null)
   const [phase, setPhase] = useState<Phase>('idle')
   // fallback pra músicas que a base não acha (regionais, autorais)
   const [manual, setManual] = useState(false)
@@ -46,6 +49,7 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
   function reset() {
     setTitle('')
     setArtist('')
+    setArtwork(null)
     setManual(false)
     setDraft(null)
     setExisting(null)
@@ -183,27 +187,27 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
         </button>
       </div>
 
-      {/* Entrada: busca como porta principal, com fallback manual */}
-      {!manual ? (
+      {/* Entrada: busca (principal) → fallback manual → estado de geração.
+          Durante a geração, a entrada dá lugar ao herói com capa + skeleton. */}
+      {phase === 'generating' ? (
+        <GeneratingFiche title={title} artist={artist} artwork={artwork} />
+      ) : !manual ? (
         <div className="space-y-2">
           <SongSearch
-            disabled={phase === 'generating'}
-            onPick={({ title: t, artist: a }) => {
+            onPick={({ title: t, artist: a, artwork: art }) => {
               setTitle(t)
               setArtist(a)
+              setArtwork(art ?? null)
               generate(t, a)
             }}
           />
-          <div className="flex items-center gap-3 text-xs text-[color:var(--color-ash)]">
-            {phase === 'generating' && <span className="italic">gerando ficha…</span>}
-            <button
-              type="button"
-              onClick={() => setManual(true)}
-              className="underline decoration-dotted underline-offset-2 hover:text-[color:var(--color-paper)]"
-            >
-              digitar manualmente
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setManual(true)}
+            className="text-xs text-[color:var(--color-ash)] underline decoration-dotted underline-offset-2 transition-colors hover:text-[color:var(--color-paper)]"
+          >
+            digitar manualmente
+          </button>
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -211,12 +215,15 @@ export function AddSong({ onAdded }: { onAdded: (song: Song) => void }) {
           <input className={inputClass} style={borderStyle} placeholder="Artista" value={artist} onChange={(e) => setArtist(e.target.value)} />
           <button
             type="button"
-            onClick={() => generate()}
-            disabled={phase === 'generating' || !title.trim() || !artist.trim()}
+            onClick={() => {
+              setArtwork(null)
+              generate()
+            }}
+            disabled={!title.trim() || !artist.trim()}
             className="rounded-md px-4 py-2 text-sm text-[color:var(--color-ink)] transition-opacity disabled:opacity-40"
             style={{ background: 'var(--color-patina)' }}
           >
-            {phase === 'generating' ? 'buscando…' : 'buscar / gerar'}
+            buscar / gerar
           </button>
           <button
             type="button"

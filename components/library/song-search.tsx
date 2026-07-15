@@ -11,7 +11,7 @@ const MIN_CHARS = 2
 const DEBOUNCE_MS = 250
 
 interface SongSearchProps {
-  onPick: (song: { title: string; artist: string }) => void
+  onPick: (song: { title: string; artist: string; artwork?: string | null }) => void
   disabled?: boolean
 }
 
@@ -76,7 +76,7 @@ export function SongSearch({ onPick, disabled }: SongSearchProps) {
   }, [])
 
   function pick(result: MusicSearchResult) {
-    onPick({ title: result.title, artist: result.artist })
+    onPick({ title: result.title, artist: result.artist, artwork: result.artwork })
     setQuery('')
     setResults([])
     setOpen(false)

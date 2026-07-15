@@ -22,6 +22,7 @@ interface CanonicalRow {
   best_lesson_label: string | null
   best_lesson_url: string | null
   notes: string | null
+  artwork: string | null
 }
 
 interface EntryRow {
@@ -74,6 +75,7 @@ function entryToSong(e: EntryRow): Song | null {
       ? { label: c.best_lesson_label ?? 'estudar', url: c.best_lesson_url }
       : undefined,
     notes: o.notes ?? c.notes ?? undefined,
+    artwork: c.artwork ?? undefined,
     entryId: e.id,
     personalNote: e.personal_note ?? undefined,
     sections,

@@ -18,7 +18,32 @@ import {
   type Material,
 } from '@/lib/library/data'
 import { RELATIVE_DIFFICULTY_LABEL, type SongFit } from '@/lib/library/personalization'
+import { artworkHiRes } from '@/lib/library/artwork'
 import { SectionsBlock, ProgressBar } from './sections'
+
+// Capa do álbum (canônica). Cai num placeholder ♪ quando a música não tem capa
+// (adicionada manualmente, ou antes de termos a arte).
+function Cover({ artwork, size, className }: { artwork?: string; size: number; className?: string }) {
+  return (
+    <div
+      className={`relative shrink-0 overflow-hidden rounded-md ${className ?? ''}`}
+      style={{ width: size, height: size, background: 'color-mix(in oklch, var(--color-paper) 8%, transparent)' }}
+    >
+      {artwork ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={artworkHiRes(artwork, size * 2)} alt="" className="h-full w-full object-cover" />
+      ) : (
+        <div
+          className="flex h-full w-full items-center justify-center text-[color:var(--color-ash)]"
+          style={{ fontSize: size * 0.42 }}
+          aria-hidden
+        >
+          ♪
+        </div>
+      )}
+    </div>
+  )
+}
 
 type ById = Record<string, Song>
 
@@ -219,13 +244,16 @@ function SongSheet({
         <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: 'color-mix(in oklch, var(--color-ash) 40%, transparent)' }} />
 
         <div className="mb-5 flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h2 className="font-serif text-2xl leading-tight text-[color:var(--color-paper)]">{song.title}</h2>
-            <p className="mt-0.5 text-sm italic text-[color:var(--color-ash)]">{song.artist}</p>
-            <div className="mt-3 flex flex-wrap items-center gap-3">
-              <StatusPill status={song.status} />
-              <DifficultyDots level={song.difficulty} />
-              {fit && <RelFitPill rd={fit.relativeDifficulty} />}
+          <div className="flex min-w-0 gap-4">
+            <Cover artwork={song.artwork} size={72} className="mt-0.5 rounded-lg" />
+            <div className="min-w-0">
+              <h2 className="font-serif text-2xl leading-tight text-[color:var(--color-paper)]">{song.title}</h2>
+              <p className="mt-0.5 text-sm italic text-[color:var(--color-ash)]">{song.artist}</p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <StatusPill status={song.status} />
+                <DifficultyDots level={song.difficulty} />
+                {fit && <RelFitPill rd={fit.relativeDifficulty} />}
+              </div>
             </div>
           </div>
           <button
@@ -373,6 +401,7 @@ function SongRow({ song, fit, onOpen }: { song: Song; fit?: SongFit; onOpen: () 
         className="flex w-full items-center gap-4 rounded-lg border px-4 py-4 text-left transition-colors hover:border-[color:var(--color-patina)] sm:px-5"
         style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 20%, transparent)' }}
       >
+        <Cover artwork={song.artwork} size={52} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span className="font-serif text-lg text-[color:var(--color-paper)]">{song.title}</span>

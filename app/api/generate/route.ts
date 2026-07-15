@@ -21,6 +21,7 @@ interface CanonicalRow {
   best_lesson_url: string | null
   notes: string | null
   sections: Section[] | null
+  artwork: string | null
 }
 
 // Música canônica → Song (ainda sem entrada do usuário: status/relações vazios).
@@ -44,6 +45,7 @@ function canonicalToSong(c: CanonicalRow): Song {
       : undefined,
     notes: c.notes ?? undefined,
     sections: c.sections ?? [],
+    artwork: c.artwork ?? undefined,
   }
 }
 

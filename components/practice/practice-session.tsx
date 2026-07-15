@@ -181,29 +181,30 @@ export function PracticeSession({
         </>
       )}
 
-      {/* item atual */}
-      {song ? (
-        <SongItem
-          key={song.entryId ?? song.id}
-          song={song}
-          onCycle={(id) => cycle(song, id)}
-          onAdvance={() => advance(song)}
-          onLogged={addDay}
-        />
-      ) : exercise ? (
-        <ExerciseItem exercise={exercise} onLogged={addDay} />
-      ) : (
-        <div className="mt-10 text-center">
-          <p className="text-lg text-[color:var(--color-paper)]/85">Tudo dominado por aqui 🎉</p>
-          <p className="mt-2 text-sm text-[color:var(--color-ash)]">Hora de uma música nova.</p>
-          <Link
-            href="/biblioteca"
-            className="mt-3 inline-block text-sm text-[color:var(--color-patina)] underline decoration-[color:var(--color-ash)] decoration-1 underline-offset-4"
-          >
-            Ir pra Biblioteca →
-          </Link>
-        </div>
-      )}
+      {/* item atual — key + rise-in fazem cada item da sessão entrar suave */}
+      <div key={onExercise ? 'ex' : (song?.entryId ?? song?.id ?? 'none')} className="aeolia-rise">
+        {song ? (
+          <SongItem
+            song={song}
+            onCycle={(id) => cycle(song, id)}
+            onAdvance={() => advance(song)}
+            onLogged={addDay}
+          />
+        ) : exercise ? (
+          <ExerciseItem exercise={exercise} onLogged={addDay} />
+        ) : (
+          <div className="mt-10 text-center">
+            <p className="text-lg text-[color:var(--color-paper)]/85">Tudo dominado por aqui 🎉</p>
+            <p className="mt-2 text-sm text-[color:var(--color-ash)]">Hora de uma música nova.</p>
+            <Link
+              href="/biblioteca"
+              className="mt-3 inline-block text-sm text-[color:var(--color-patina)] underline decoration-[color:var(--color-ash)] decoration-1 underline-offset-4"
+            >
+              Ir pra Biblioteca →
+            </Link>
+          </div>
+        )}
+      </div>
 
       {/* navegação da sessão */}
       {total > 1 && (
@@ -211,7 +212,7 @@ export function PracticeSession({
           <button
             type="button"
             onClick={() => go(-1)}
-            className="rounded-md border px-4 py-2 text-sm text-[color:var(--color-paper)] transition-colors hover:border-[color:var(--color-patina)]"
+            className="rounded-md border px-4 py-2 text-sm text-[color:var(--color-paper)] transition-all hover:border-[color:var(--color-patina)] active:scale-95"
             style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 25%, transparent)' }}
           >
             ← anterior
@@ -219,7 +220,7 @@ export function PracticeSession({
           <button
             type="button"
             onClick={() => go(1)}
-            className="rounded-md px-5 py-2 text-sm text-[color:var(--color-ink)]"
+            className="rounded-md px-5 py-2 text-sm text-[color:var(--color-ink)] transition-transform active:scale-95"
             style={{ background: 'var(--color-patina)' }}
           >
             próximo →
@@ -283,15 +284,19 @@ function SongItem({
                 <button
                   type="button"
                   onClick={() => onCycle(s.id)}
-                  className="flex w-full items-center justify-between gap-4 rounded-xl border px-5 py-4 text-left transition-colors"
+                  className="flex w-full items-center justify-between gap-4 rounded-xl border px-5 py-4 text-left transition-all active:scale-[0.99]"
                   style={{
                     borderColor: isNext
                       ? 'color-mix(in oklch, var(--color-patina) 55%, transparent)'
                       : s.status === 'dominada'
                         ? 'color-mix(in oklch, var(--color-moss) 55%, transparent)'
                         : 'color-mix(in oklch, var(--color-ash) 25%, transparent)',
-                    background:
-                      s.status === 'dominada' ? 'color-mix(in oklch, var(--color-moss) 12%, transparent)' : 'transparent',
+                    background: isNext
+                      ? 'color-mix(in oklch, var(--color-patina) 8%, transparent)'
+                      : s.status === 'dominada'
+                        ? 'color-mix(in oklch, var(--color-moss) 12%, transparent)'
+                        : 'transparent',
+                    boxShadow: isNext ? '0 8px 24px -12px color-mix(in oklch, var(--color-patina) 60%, transparent)' : 'none',
                   }}
                 >
                   <span className="text-lg text-[color:var(--color-paper)]">{s.name}</span>
@@ -316,8 +321,8 @@ function SongItem({
           <button
             type="button"
             onClick={onAdvance}
-            className="w-full rounded-lg py-3 text-sm font-medium text-[color:var(--color-ink)] transition-opacity active:opacity-80"
-            style={{ background: 'var(--color-moss)' }}
+            className="w-full rounded-lg py-3 text-sm font-medium text-[color:var(--color-ink)] transition-transform active:scale-[0.98]"
+            style={{ background: 'var(--color-moss)', boxShadow: '0 10px 30px -14px color-mix(in oklch, var(--color-moss) 80%, transparent)' }}
           >
             ✓ concluí a parte “{next.name}”
           </button>

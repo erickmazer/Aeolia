@@ -1,6 +1,6 @@
+import { redirect } from 'next/navigation'
 import { isSupabaseConfigured } from '@/lib/supabase/env'
 import { getCurrentUser } from '@/lib/library/queries'
-import { SignInPanel } from '@/components/library/auth-button'
 import { AppShell } from '@/components/app/app-shell'
 
 function Centered({ children }: { children: React.ReactNode }) {
@@ -24,17 +24,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const user = await getCurrentUser()
-  if (!user) {
-    return (
-      <Centered>
-        <h1 className="mb-2 font-serif text-3xl">Aeolia</h1>
-        <p className="mb-6 leading-relaxed text-[color:var(--color-paper)]/85">
-          Entre para acessar a sua jornada.
-        </p>
-        <SignInPanel next="/praticar" />
-      </Centered>
-    )
-  }
+  // Deslogado → a tela única de login em `/` (evita a 2ª tela duplicada).
+  if (!user) redirect('/')
 
   const label =
     (user.user_metadata?.full_name as string | undefined) ??

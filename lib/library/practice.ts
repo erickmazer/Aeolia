@@ -22,9 +22,17 @@ export interface PracticeSummary {
   totalMinutes: number
   /** por entry_id: nº de sessões e último dia praticado. */
   byEntry: Record<string, { count: number; lastDay: string }>
+  /** por dia local (YYYY-MM-DD): sessões e minutos — alimenta o heatmap. */
+  byDay: Record<string, { count: number; minutes: number }>
 }
 
-export const EMPTY_SUMMARY: PracticeSummary = { days: [], totalSessions: 0, totalMinutes: 0, byEntry: {} }
+export const EMPTY_SUMMARY: PracticeSummary = {
+  days: [],
+  totalSessions: 0,
+  totalMinutes: 0,
+  byEntry: {},
+  byDay: {},
+}
 
 /** Dia local (YYYY-MM-DD) de uma data — usa o fuso do ambiente que chama. */
 export function localDay(d: Date = new Date()): string {
@@ -33,7 +41,7 @@ export function localDay(d: Date = new Date()): string {
 }
 
 /** Soma `delta` dias a um YYYY-MM-DD (sem drift de fuso: opera em UTC puro). */
-function addDays(day: string, delta: number): string {
+export function addDays(day: string, delta: number): string {
   const [y, m, d] = day.split('-').map(Number)
   const t = Date.UTC(y, m - 1, d) + delta * 86_400_000
   return new Date(t).toISOString().slice(0, 10)

@@ -164,11 +164,15 @@ export async function getPracticeSummary(): Promise<PracticeSummary> {
   const rows = (data ?? []) as PracticeLogRow[]
   const daySet = new Set<string>()
   const byEntry: Record<string, { count: number; lastDay: string }> = {}
+  const byDay: Record<string, { count: number; minutes: number }> = {}
   let totalMinutes = 0
 
   for (const r of rows) {
     daySet.add(r.local_day)
     totalMinutes += r.minutes ?? 0
+    const d = (byDay[r.local_day] ??= { count: 0, minutes: 0 })
+    d.count++
+    d.minutes += r.minutes ?? 0
     if (r.entry_id) {
       const cur = byEntry[r.entry_id]
       if (cur) {
@@ -185,6 +189,7 @@ export async function getPracticeSummary(): Promise<PracticeSummary> {
     totalSessions: rows.length,
     totalMinutes,
     byEntry,
+    byDay,
   }
 }
 

@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { Loading } from '@/components/app/spinner'
 import {
   computeStreak,
   daysThisWeek,
@@ -76,11 +78,35 @@ export function YouStats({ summary }: { summary: PracticeSummary }) {
 }
 
 // Conta — perfil + sair. Traz o "sair" (antes só no header) pra dentro de Você.
-export function AccountSection({ label }: { label: string }) {
+// `isOwner` (dono da vitrine) libera manutenções, como o backfill de capas.
+export function AccountSection({ label, isOwner }: { label: string; isOwner?: boolean }) {
+  const [backfill, setBackfill] = useState<'idle' | 'running' | 'done' | 'error'>('idle')
+  const [msg, setMsg] = useState('')
+
   async function signOut() {
     const supabase = createClient()
     await supabase.auth.signOut()
     window.location.href = '/musician/erick'
+  }
+
+  async function fillCovers() {
+    setBackfill('running')
+    setMsg('')
+    try {
+      const res = await fetch('/api/backfill-artwork', { method: 'POST' })
+      const payload = (await res.json().catch(() => ({}))) as {
+        updated?: number
+        remaining?: number | null
+        error?: string
+      }
+      if (!res.ok) throw new Error(payload.error ?? `Erro ${res.status}`)
+      const { updated = 0, remaining } = payload
+      setMsg(`${updated} ${updated === 1 ? 'capa preenchida' : 'capas preenchidas'}${remaining ? ` · ${remaining} restantes` : ' · tudo em dia'}`)
+      setBackfill('done')
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : 'Falha ao preencher capas.')
+      setBackfill('error')
+    }
   }
 
   return (
@@ -100,6 +126,34 @@ export function AccountSection({ label }: { label: string }) {
           sair
         </button>
       </div>
+
+      {isOwner && (
+        <div className="mt-6">
+          <h3 className="mb-2 text-xs uppercase tracking-widest text-[color:var(--color-ash)]">Manutenção</h3>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={fillCovers}
+              disabled={backfill === 'running'}
+              className="rounded-md border px-4 py-2 text-sm text-[color:var(--color-paper)] transition-all hover:border-[color:var(--color-patina)] active:scale-95 disabled:opacity-50"
+              style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 25%, transparent)' }}
+            >
+              {backfill === 'running' ? <Loading>preenchendo…</Loading> : 'preencher capas faltantes'}
+            </button>
+            {msg && (
+              <span
+                className="text-xs"
+                style={{ color: backfill === 'error' ? 'oklch(0.65 0.15 25)' : 'var(--color-ash)' }}
+              >
+                {msg}
+              </span>
+            )}
+          </div>
+          {backfill === 'done' && (msg.includes('restantes')) && (
+            <p className="mt-1.5 text-xs text-[color:var(--color-ash)]">Clique de novo pra continuar o lote.</p>
+          )}
+        </div>
+      )}
     </section>
   )
 }

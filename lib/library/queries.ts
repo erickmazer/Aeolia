@@ -89,6 +89,18 @@ function sortSongs(songs: Song[]): Song[] {
   return songs.sort((a, b) => a.difficulty - b.difficulty || a.title.localeCompare(b.title))
 }
 
+/** O usuário logado é o dono da vitrine (profiles.is_showcase)? */
+export async function isShowcaseOwner(): Promise<boolean> {
+  if (!isSupabaseConfigured) return false
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return false
+  const { data } = await supabase.from('profiles').select('is_showcase').eq('id', user.id).maybeSingle()
+  return Boolean(data?.is_showcase)
+}
+
 /** Usuário logado (ou null). */
 export async function getCurrentUser() {
   if (!isSupabaseConfigured) return null

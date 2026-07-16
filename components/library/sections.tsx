@@ -58,6 +58,15 @@ export function SectionsBlock({
     commit(sections.filter((s) => s.id !== id))
   }
 
+  // Reordena trocando com a parte vizinha (↑/↓). Persiste via onChange.
+  function move(index: number, dir: -1 | 1) {
+    const j = index + dir
+    if (j < 0 || j >= sections.length) return
+    const next = sections.slice()
+    ;[next[index], next[j]] = [next[j], next[index]]
+    commit(next)
+  }
+
   function setChords(id: string, value: string) {
     commit(sections.map((s) => (s.id === id ? { ...s, chords: value || undefined } : s)))
   }
@@ -73,7 +82,7 @@ export function SectionsBlock({
 
       {sections.length > 0 && (
         <ul className="flex flex-col gap-1.5">
-          {sections.map((s) => (
+          {sections.map((s, i) => (
             <li key={s.id} className="space-y-2">
               <div className="flex items-center gap-2">
                 <button
@@ -91,14 +100,34 @@ export function SectionsBlock({
                   </span>
                 </button>
                 {editable && (
-                  <button
-                    type="button"
-                    onClick={() => remove(s.id)}
-                    aria-label={`Remover ${s.name}`}
-                    className="text-xs text-[color:var(--color-ash)] transition-colors hover:text-[color:oklch(0.6_0.15_25)]"
-                  >
-                    ✕
-                  </button>
+                  <div className="ml-auto flex items-center gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => move(i, -1)}
+                      disabled={i === 0}
+                      aria-label={`Mover ${s.name} para cima`}
+                      className="flex h-6 w-6 items-center justify-center rounded text-sm text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)] disabled:opacity-25"
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => move(i, 1)}
+                      disabled={i === sections.length - 1}
+                      aria-label={`Mover ${s.name} para baixo`}
+                      className="flex h-6 w-6 items-center justify-center rounded text-sm text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)] disabled:opacity-25"
+                    >
+                      ↓
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => remove(s.id)}
+                      aria-label={`Remover ${s.name}`}
+                      className="flex h-6 w-6 items-center justify-center rounded text-xs text-[color:var(--color-ash)] transition-colors hover:text-[color:oklch(0.6_0.15_25)]"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 )}
               </div>
               {s.chords && <ChordRow chords={s.chords} />}

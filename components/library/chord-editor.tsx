@@ -39,6 +39,14 @@ export function ChordEditor({ chords, onChange }: { chords: string; onChange: (c
   function removeAt(i: number) {
     commit(list.filter((_, idx) => idx !== i))
   }
+  // Reordena o acorde trocando com o vizinho (◀/▶).
+  function move(i: number, dir: -1 | 1) {
+    const j = i + dir
+    if (j < 0 || j >= list.length) return
+    const next = list.slice()
+    ;[next[i], next[j]] = [next[j], next[i]]
+    commit(next)
+  }
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -55,19 +63,37 @@ export function ChordEditor({ chords, onChange }: { chords: string; onChange: (c
             return (
               <span
                 key={`${i}-${c}`}
-                className="inline-flex items-center gap-1.5 rounded-full py-1 pl-3 pr-1.5 text-sm"
+                className="inline-flex items-center gap-1 rounded-full py-1 pl-1 pr-1.5 text-sm"
                 style={{
                   color: 'var(--color-paper)',
                   background: 'color-mix(in oklch, var(--color-paper) 6%, transparent)',
                   border: `1px solid color-mix(in oklch, ${known ? 'var(--color-patina)' : 'oklch(0.65 0.13 60)'} 45%, transparent)`,
                 }}
               >
-                {c}
+                <button
+                  type="button"
+                  onClick={() => move(i, -1)}
+                  disabled={i === 0}
+                  aria-label={`Mover ${c} para a esquerda`}
+                  className="flex h-5 w-4 items-center justify-center rounded text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)] disabled:opacity-25"
+                >
+                  ‹
+                </button>
+                <span className="px-0.5">{c}</span>
                 {!known && (
                   <span title="Acorde sem diagrama no catálogo" aria-label="sem diagrama" className="text-[color:oklch(0.72_0.13_60)]">
                     ⚠
                   </span>
                 )}
+                <button
+                  type="button"
+                  onClick={() => move(i, 1)}
+                  disabled={i === list.length - 1}
+                  aria-label={`Mover ${c} para a direita`}
+                  className="flex h-5 w-4 items-center justify-center rounded text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)] disabled:opacity-25"
+                >
+                  ›
+                </button>
                 <button
                   type="button"
                   onClick={() => removeAt(i)}

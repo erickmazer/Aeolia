@@ -44,7 +44,11 @@ export function YouStats({ summary }: { summary: PracticeSummary }) {
           <div
             key={t.l}
             className="rounded-xl border px-2 py-3 text-center"
-            style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 20%, transparent)' }}
+            style={{
+              borderColor: 'color-mix(in oklch, var(--color-ash) 18%, transparent)',
+              background: 'linear-gradient(to bottom, color-mix(in oklch, var(--color-paper) 5%, transparent), transparent)',
+              boxShadow: '0 8px 24px -18px rgba(0,0,0,0.8)',
+            }}
           >
             <div className="font-serif text-2xl tabular-nums text-[color:var(--color-paper)]">{t.n}</div>
             <div className="mt-0.5 text-[10px] uppercase tracking-wide text-[color:var(--color-ash)]">{t.l}</div>
@@ -90,7 +94,7 @@ export function AccountSection({ label }: { label: string }) {
         <button
           type="button"
           onClick={signOut}
-          className="shrink-0 rounded-md border px-4 py-2 text-sm text-[color:var(--color-paper)] transition-colors hover:border-[color:var(--color-patina)]"
+          className="shrink-0 rounded-md border px-4 py-2 text-sm text-[color:var(--color-paper)] transition-all hover:border-[color:var(--color-patina)] active:scale-95"
           style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 25%, transparent)' }}
         >
           sair

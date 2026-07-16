@@ -13,7 +13,7 @@ const MAX_BPM = 240
 const LOOKAHEAD_MS = 25 // de quanto em quanto o scheduler roda
 const SCHEDULE_AHEAD = 0.1 // quantos segundos à frente agendar
 
-export function Metronome() {
+export function Metronome({ compact = false }: { compact?: boolean } = {}) {
   const [bpm, setBpm] = useState(90)
   const [beatsPerBar, setBeatsPerBar] = useState(4)
   const [playing, setPlaying] = useState(false)
@@ -130,7 +130,7 @@ export function Metronome() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-7 py-2">
+    <div className={`flex flex-col items-center ${compact ? 'gap-3' : 'gap-7 py-2'}`}>
       {/* Beats do compasso — o aceso segue o clique real */}
       <div className="flex items-center gap-2.5" aria-hidden>
         {Array.from({ length: beatsPerBar }).map((_, i) => {
@@ -156,7 +156,7 @@ export function Metronome() {
       {/* BPM */}
       <div className="flex flex-col items-center gap-1">
         <span
-          className="font-serif text-6xl tabular-nums leading-none text-[color:var(--color-paper)]"
+          className={`font-serif tabular-nums leading-none text-[color:var(--color-paper)] ${compact ? 'text-4xl' : 'text-6xl'}`}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
           {bpm}
@@ -216,7 +216,8 @@ export function Metronome() {
         </button>
       </div>
 
-      {/* Tempos por compasso */}
+      {/* Tempos por compasso — escondido no modo compacto (fica no ToolsSheet) */}
+      {!compact && (
       <div className="flex items-center gap-2">
         <span className="text-xs text-[color:var(--color-ash)]">compasso</span>
         {[2, 3, 4, 5, 6, 7].map((n) => {
@@ -238,6 +239,7 @@ export function Metronome() {
           )
         })}
       </div>
+      )}
     </div>
   )
 }

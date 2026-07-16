@@ -20,6 +20,7 @@ import {
 } from '@/lib/library/practice'
 import { ChordRow } from '@/components/library/chord-diagram'
 import { LogPractice } from '@/components/library/log-practice'
+import { Metronome } from '@/components/tools/metronome'
 
 export interface ExerciseSuggestion {
   name: string
@@ -256,16 +257,41 @@ function SongItem({
   const sections = song.sections ?? []
   const pct = Math.round(sectionProgress(sections) * 100)
   const next = firstPending(sections)
+  const [metroOpen, setMetroOpen] = useState(false)
 
   return (
     <div>
       <div className="mb-5">
         <h2 className="font-serif text-4xl leading-tight text-[color:var(--color-paper)]">{song.title}</h2>
         <p className="mt-1 text-lg italic text-[color:var(--color-ash)]">{song.artist}</p>
-        {sections.length > 0 && (
-          <p className="mt-2 text-sm text-[color:var(--color-ash)] tabular-nums">{pct}% dominado</p>
-        )}
+        <div className="mt-2 flex items-center gap-4">
+          {sections.length > 0 && (
+            <span className="text-sm text-[color:var(--color-ash)] tabular-nums">{pct}% dominado</span>
+          )}
+          <button
+            type="button"
+            onClick={() => setMetroOpen((v) => !v)}
+            aria-expanded={metroOpen}
+            className="inline-flex items-center gap-1.5 text-sm text-[color:var(--color-ash)] transition-colors hover:text-[color:var(--color-paper)]"
+          >
+            {/* diapasão */}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M8 3v9a4 4 0 0 0 8 0V3" />
+              <path d="M12 16v5" />
+            </svg>
+            metrônomo
+          </button>
+        </div>
       </div>
+
+      {metroOpen && (
+        <div
+          className="aeolia-rise mb-6 rounded-xl border p-4"
+          style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 22%, transparent)' }}
+        >
+          <Metronome compact />
+        </div>
+      )}
 
       {sections.length === 0 ? (
         <p

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { SECTION_STATUS_LABEL, sectionProgress, type Section, type Song } from '@/lib/library/data'
 import { NEXT_SECTION_STATUS, SECTION_STATUS_COLOR as STATUS_COLOR } from '@/lib/library/section-progress'
 import { ChordRow } from './chord-diagram'
+import { ChordEditor } from './chord-editor'
 
 function newId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
@@ -101,15 +102,7 @@ export function SectionsBlock({
                 )}
               </div>
               {s.chords && <ChordRow chords={s.chords} />}
-              {editable && (
-                <input
-                  value={s.chords ?? ''}
-                  onChange={(e) => setChords(s.id, e.target.value)}
-                  placeholder="acordes: C G Am F"
-                  className="w-full max-w-xs rounded-md border bg-transparent px-2 py-1 text-sm text-[color:var(--color-paper)] placeholder:text-[color:var(--color-ash)]"
-                  style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 22%, transparent)' }}
-                />
-              )}
+              {editable && <ChordEditor chords={s.chords ?? ''} onChange={(v) => setChords(s.id, v)} />}
             </li>
           ))}
         </ul>

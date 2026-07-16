@@ -22,10 +22,11 @@ export function BibliotecaTabs({ musicas, materiais }: { musicas: React.ReactNod
               type="button"
               onClick={() => setTab(t)}
               aria-pressed={sel}
-              className="rounded-md px-4 py-1.5 text-sm transition-colors"
+              className="rounded-md px-4 py-1.5 text-sm transition-all active:scale-95"
               style={{
                 background: sel ? 'var(--color-patina)' : 'transparent',
                 color: sel ? 'var(--color-ink)' : 'var(--color-ash)',
+                boxShadow: sel ? '0 4px 14px -6px color-mix(in oklch, var(--color-patina) 70%, transparent)' : 'none',
               }}
             >
               {t === 'musicas' ? 'Músicas' : 'Materiais'}

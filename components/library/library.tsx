@@ -17,33 +17,10 @@ import {
   type Section,
   type Material,
 } from '@/lib/library/data'
+import Link from 'next/link'
 import { RELATIVE_DIFFICULTY_LABEL, type SongFit } from '@/lib/library/personalization'
-import { artworkHiRes } from '@/lib/library/artwork'
 import { SectionsBlock, ProgressBar } from './sections'
-
-// Capa do álbum (canônica). Cai num placeholder ♪ quando a música não tem capa
-// (adicionada manualmente, ou antes de termos a arte).
-function Cover({ artwork, size, className }: { artwork?: string; size: number; className?: string }) {
-  return (
-    <div
-      className={`relative shrink-0 overflow-hidden rounded-md ${className ?? ''}`}
-      style={{ width: size, height: size, background: 'color-mix(in oklch, var(--color-paper) 8%, transparent)' }}
-    >
-      {artwork ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={artworkHiRes(artwork, size * 2)} alt="" className="h-full w-full object-cover" />
-      ) : (
-        <div
-          className="flex h-full w-full items-center justify-center text-[color:var(--color-ash)]"
-          style={{ fontSize: size * 0.42 }}
-          aria-hidden
-        >
-          ♪
-        </div>
-      )}
-    </div>
-  )
-}
+import { Cover } from './cover'
 
 type ById = Record<string, Song>
 
@@ -66,7 +43,7 @@ function RelFitPill({ rd }: { rd: SongFit['relativeDifficulty'] }) {
 
 // ── Pequenos átomos visuais ─────────────────────────────────────────────────
 
-function DifficultyDots({ level }: { level: number }) {
+export function DifficultyDots({ level }: { level: number }) {
   return (
     <span
       className="inline-flex items-center gap-1 align-middle"
@@ -87,7 +64,7 @@ function DifficultyDots({ level }: { level: number }) {
   )
 }
 
-function StatusPill({ status }: { status: Status }) {
+export function StatusPill({ status }: { status: Status }) {
   const meta = STATUS_BY_ID[status]
   return (
     <span
@@ -391,37 +368,48 @@ function SongSheet({
   )
 }
 
-// Linha compacta da lista — toca pra abrir a ficha em folha (não expande inline).
-function SongRow({ song, fit, onOpen }: { song: Song; fit?: SongFit; onOpen: () => void }) {
+// Linha compacta da lista. Na biblioteca pessoal vira link pra página da música
+// (`href`); na vitrine, abre a ficha em folha (`onOpen`).
+function SongRow({ song, fit, onOpen, href }: { song: Song; fit?: SongFit; onOpen: () => void; href?: string }) {
+  const cls =
+    'flex w-full items-center gap-4 rounded-xl border px-4 py-4 text-left transition-all hover:border-[color:var(--color-patina)] active:scale-[0.99] sm:px-5'
+  const style = { borderColor: 'color-mix(in oklch, var(--color-ash) 20%, transparent)' }
+  const inner = (
+    <>
+      <Cover artwork={song.artwork} size={52} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="font-serif text-lg text-[color:var(--color-paper)]">{song.title}</span>
+          <span className="text-sm italic text-[color:var(--color-ash)]">{song.artist}</span>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <StatusPill status={song.status} />
+          <DifficultyDots level={song.difficulty} />
+          {fit && <RelFitPill rd={fit.relativeDifficulty} />}
+        </div>
+        {song.sections && song.sections.length > 0 && (
+          <div className="mt-2">
+            <ProgressBar sections={song.sections} />
+          </div>
+        )}
+      </div>
+      <span className="shrink-0 text-[color:var(--color-ash)]" aria-hidden>
+        →
+      </span>
+    </>
+  )
+
   return (
     <li>
-      <button
-        type="button"
-        onClick={onOpen}
-        className="flex w-full items-center gap-4 rounded-lg border px-4 py-4 text-left transition-colors hover:border-[color:var(--color-patina)] sm:px-5"
-        style={{ borderColor: 'color-mix(in oklch, var(--color-ash) 20%, transparent)' }}
-      >
-        <Cover artwork={song.artwork} size={52} />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="font-serif text-lg text-[color:var(--color-paper)]">{song.title}</span>
-            <span className="text-sm italic text-[color:var(--color-ash)]">{song.artist}</span>
-          </div>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <StatusPill status={song.status} />
-            <DifficultyDots level={song.difficulty} />
-            {fit && <RelFitPill rd={fit.relativeDifficulty} />}
-          </div>
-          {song.sections && song.sections.length > 0 && (
-            <div className="mt-2">
-              <ProgressBar sections={song.sections} />
-            </div>
-          )}
-        </div>
-        <span className="shrink-0 text-[color:var(--color-ash)]" aria-hidden>
-          →
-        </span>
-      </button>
+      {href ? (
+        <Link href={href} className={cls} style={style}>
+          {inner}
+        </Link>
+      ) : (
+        <button type="button" onClick={onOpen} className={cls} style={style}>
+          {inner}
+        </button>
+      )}
     </li>
   )
 }
@@ -435,6 +423,7 @@ export function Library({
   fit,
   onSectionsChange,
   materials,
+  songHref,
 }: {
   songs: Song[]
   editable?: boolean
@@ -442,6 +431,9 @@ export function Library({
   fit?: Record<string, SongFit>
   onSectionsChange?: (song: Song, sections: Section[]) => void
   materials?: Record<string, Material[]>
+  /** Quando definido, cada linha vira link pra essa rota (ex.: página da música)
+   *  em vez de abrir a ficha em bottom sheet. Usado na biblioteca pessoal. */
+  songHref?: (song: Song) => string
 }) {
   const [statusFilter, setStatusFilter] = useState<Status | null>(null)
   const [techniqueFilter, setTechniqueFilter] = useState<TechniqueId | null>(null)
@@ -621,13 +613,19 @@ export function Library({
         ) : (
           <ul className="space-y-3">
             {filtered.map((song) => (
-              <SongRow key={song.id} song={song} fit={fit?.[song.id]} onOpen={() => setSelectedId(song.id)} />
+              <SongRow
+                key={song.id}
+                song={song}
+                fit={fit?.[song.id]}
+                onOpen={() => setSelectedId(song.id)}
+                href={songHref?.(song)}
+              />
             ))}
           </ul>
         )}
       </section>
 
-      {selected && (
+      {selected && !songHref && (
         <SongSheet
           song={selected}
           byId={byId}

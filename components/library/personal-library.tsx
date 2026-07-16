@@ -191,6 +191,7 @@ export function PersonalLibrary({
         fit={fit}
         onSectionsChange={handleSectionsChange}
         materials={materialsByEntry}
+        songHref={(s) => `/biblioteca/${s.id}`}
       />
     </div>
   )

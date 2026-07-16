@@ -1,4 +1,4 @@
-import { getCurrentUser, getMyExercises, getMySongs, getPracticeSummary } from '@/lib/library/queries'
+import { getCurrentUser, getMyExercises, getMySongs, getPracticeSummary, isShowcaseOwner } from '@/lib/library/queries'
 import { deriveSkillXp } from '@/lib/library/skills'
 import { ExercisesPanel } from '@/components/library/exercises-panel'
 import { YouStats, AccountSection } from '@/components/app/you-panel'
@@ -8,11 +8,12 @@ export const metadata = { title: 'Você' }
 // Fase 3 do revamp de IA: a aba "Você" consolida ritmo (streak/stats) + skills +
 // exercícios + conta. Vira o hub de progresso e identidade.
 export default async function VocePage() {
-  const [user, songs, levels, summary] = await Promise.all([
+  const [user, songs, levels, summary, owner] = await Promise.all([
     getCurrentUser(),
     getMySongs(),
     getMyExercises(),
     getPracticeSummary(),
+    isShowcaseOwner(),
   ])
   const skills = deriveSkillXp(songs ?? [])
   const max = Math.max(1, ...skills.map((s) => s.xp))
@@ -51,7 +52,7 @@ export default async function VocePage() {
 
       {user && <ExercisesPanel userId={user.id} initialLevels={levels} />}
 
-      <AccountSection label={label} />
+      <AccountSection label={label} isOwner={owner} />
     </div>
   )
 }

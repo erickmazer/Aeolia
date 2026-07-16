@@ -51,7 +51,11 @@ export function ExercisesPanel({
               {list.map((e) => {
                 const level = levels[e.id] ?? 0
                 return (
-                  <li key={e.id} className="rounded-xl border p-4" style={borderStyle}>
+                  <li
+                    key={e.id}
+                    className="rounded-xl border p-4 transition-colors hover:border-[color:color-mix(in_oklch,var(--color-patina)_45%,transparent)]"
+                    style={{ ...borderStyle, boxShadow: '0 8px 24px -18px rgba(0,0,0,0.8)' }}
+                  >
                     <div className="flex items-baseline justify-between gap-3">
                       <span className="text-[color:var(--color-paper)]">{e.nome}</span>
                       <span className="shrink-0 text-xs tabular-nums text-[color:var(--color-ash)]">dif {e.dif}/5</span>
@@ -65,7 +69,7 @@ export function ExercisesPanel({
                         <button
                           type="button"
                           onClick={() => setLevel(e.id, 1)}
-                          className="rounded-md px-3 py-1.5 text-sm text-[color:var(--color-ink)]"
+                          className="rounded-md px-3 py-1.5 text-sm text-[color:var(--color-ink)] transition-transform active:scale-95"
                           style={{ background: 'var(--color-patina)' }}
                         >
                           treinar
@@ -77,7 +81,7 @@ export function ExercisesPanel({
                             <button
                               type="button"
                               onClick={() => setLevel(e.id, level + 1)}
-                              className="rounded-md px-3 py-1.5 text-sm text-[color:var(--color-ink)]"
+                              className="rounded-md px-3 py-1.5 text-sm text-[color:var(--color-ink)] transition-transform active:scale-95"
                               style={{ background: 'var(--color-moss)' }}
                             >
                               avançar

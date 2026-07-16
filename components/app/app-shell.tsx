@@ -135,14 +135,18 @@ export function AppShell({ userLabel, children }: { userLabel: string; children:
               key={t.href}
               href={t.href}
               aria-current={active ? 'page' : undefined}
-              className="flex flex-1 flex-col items-center gap-1 text-xs tracking-wide transition-transform active:scale-90"
+              className={`flex flex-1 flex-col items-center gap-1 text-xs tracking-wide transition-transform active:scale-90 ${active ? 'font-medium' : ''}`}
               style={{ color: active ? 'var(--color-patina)' : 'var(--color-ash)' }}
             >
-              {/* pílula que acende atrás do ícone da aba ativa */}
+              {/* pílula preenchida (ícone invertido) na aba ativa — selecionado bem evidente */}
               <span
-                className="flex h-8 w-16 items-center justify-center rounded-full transition-colors duration-300"
+                className="flex h-8 w-16 items-center justify-center rounded-full transition-all duration-300"
                 style={{
-                  background: active ? 'color-mix(in oklch, var(--color-patina) 16%, transparent)' : 'transparent',
+                  background: active ? 'var(--color-patina)' : 'transparent',
+                  color: active ? 'var(--color-ink)' : 'inherit',
+                  boxShadow: active
+                    ? '0 6px 16px -6px color-mix(in oklch, var(--color-patina) 80%, transparent)'
+                    : 'none',
                 }}
               >
                 <NavIcon id={t.id} />
